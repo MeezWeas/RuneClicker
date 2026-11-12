@@ -102,6 +102,8 @@ h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-
 .item .d{font-size:12.5px;color:var(--ink-dim);grid-column:1}
 .item .buy{grid-column:2;grid-row:1 / span 2}
 .item.done{opacity:.6}
+.item.w3{grid-template-columns:minmax(0,1fr) auto auto;gap:4px 6px}
+.item .all{grid-column:3;grid-row:1 / span 2;min-width:0;padding:7px 8px;font-size:12.5px;line-height:1.15}
 .buy{background:#5b4a22;border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:7px 10px;font-weight:700;min-width:104px;font-size:13.5px}
 .buy:hover:not(:disabled){background:#75602a}
 .buy:disabled{border-color:var(--edge);color:var(--ink-dim);background:transparent;cursor:not-allowed}
@@ -217,7 +219,7 @@ footer details{max-width:520px;flex:1 1 300px}
   <section class="panel" id="shop" aria-label="Shop">
     <h2>Shop</h2>
     <h3 style="margin-top:0">Tool for <span class="skn"></span></h3>
-    <div class="item" id="toolItem"><div class="t"></div><div class="d"></div><button class="buy num" id="toolBuy"></button></div>
+    <div class="item w3" id="toolItem"><div class="t"></div><div class="d"></div><button class="buy num" id="toolBuy"></button><button class="buy all" id="toolAll" title="Buy every tool upgrade you can afford, in every skill, cheapest first">All<br>skills</button></div>
 
     <div class="row"><h3>Automation for <span class="skn"></span></h3>
       <div class="seg" role="group" aria-label="Buy amount">
@@ -484,6 +486,34 @@ function buyCount(i, owned) {
   while (n < 500) { const c = Math.ceil(WORKERS[i].c * Math.pow(W_GROW, owned + n)); if (gp < c) break; gp -= c; n++; }
   return Math.max(1, n);
 }
+const nextWorkerCost = (i, id) => Math.ceil(WORKERS[i].c * Math.pow(W_GROW, S.s[id].w[i]));
+function bulkWorkers(i) { // buy worker i for every skill, cheapest first, using the selected buy amount
+  let n = 0, cost = 0; const touched = {};
+  if (S.buy === 'max') {
+    for (let guard = 0; guard < 20000; guard++) {
+      let best = null, bc = Infinity;
+      for (const k of SKILLS) { const c = nextWorkerCost(i, k.id); if (c < bc) { bc = c; best = k.id; } }
+      if (bc > S.gp) break;
+      S.gp -= bc; cost += bc; S.s[best].w[i]++; n++; touched[best] = 1;
+    }
+  } else {
+    const amt = +S.buy;
+    const order = SKILLS.map(k => k.id).sort((a, b) => S.s[a].w[i] - S.s[b].w[i]);
+    for (const id of order) { const c = workerCost(i, S.s[id].w[i], amt); if (c > S.gp) break; S.gp -= c; cost += c; S.s[id].w[i] += amt; n += amt; touched[id] = 1; }
+  }
+  return { n, cost, skills:count(touched) };
+}
+const toolReady = id => { const t = S.s[id].tool + 1; return t < TIERS.length && LV[id] >= TOOL_REQ[t] ? TOOL_COST[t] : Infinity; };
+function bulkTools() { // buy every available tool upgrade, cheapest first
+  let n = 0, cost = 0; const touched = {};
+  for (let guard = 0; guard < 500; guard++) {
+    let best = null, bc = Infinity;
+    for (const k of SKILLS) { const c = toolReady(k.id); if (c < bc) { bc = c; best = k.id; } }
+    if (bc > S.gp) break;
+    S.gp -= bc; cost += bc; S.s[best].tool++; n++; touched[best] = 1;
+  }
+  return { n, cost, skills:count(touched) };
+}
 const questReady = q => q.all ? minLevel() >= q.all : Object.keys(q.req).every(id => LV[id] >= q.req[id]);
 const runXp = () => SKILLS.reduce((a, k) => a + S.s[k.id].xp, 0);
 const renownGain = () => Math.floor(Math.sqrt(runXp() / 200e3));
@@ -590,16 +620,25 @@ for (const k of SKILLS) {
   skillEls[k.id] = { b, lv:b.querySelector('.lv'), bar:b.querySelector('i'), gear:b.querySelector('.gear'), pet:b.querySelector('.pet') };
 }
 const workerEls = WORKERS.map((w, i) => {
-  const d = document.createElement('div'); d.className = 'item';
-  d.innerHTML = `<div class="t">${w.n}<em class="num">0</em></div><div class="d">Each performs ${w.r} action${w.r === 1 ? '' : 's'} per second</div><button class="buy num"></button>`;
+  const d = document.createElement('div'); d.className = 'item w3';
+  d.innerHTML = `<div class="t">${w.n}<em class="num">0</em></div><div class="d">Each performs ${w.r} action${w.r === 1 ? '' : 's'} per second</div><button class="buy num"></button><button class="buy all" title="Buy ${w.n} for every skill using the amount selected above, cheapest first">All<br>skills</button>`;
   $('workers').appendChild(d);
   const btn = d.querySelector('button');
   btn.onclick = () => {
     const st = S.s[S.sel], n = buyCount(i, st.w[i]), c = workerCost(i, st.w[i], n);
     if (S.gp >= c) { S.gp -= c; st.w[i] += n; dirtySkills = true; sfx('buy'); render(); }
   };
-  return { row:d, cnt:d.querySelector('em'), btn };
+  const all = d.querySelector('.all');
+  all.onclick = () => {
+    const r = bulkWorkers(i); if (!r.n) return;
+    dirtySkills = true; sfx('buy'); toast(`Bought ${r.n} × ${w.n} across ${r.skills} skill${r.skills === 1 ? '' : 's'} for ${fmt(r.cost)} gp.`); render();
+  };
+  return { row:d, cnt:d.querySelector('em'), btn, all };
 });
+$('toolAll').onclick = () => {
+  const r = bulkTools(); if (!r.n) return;
+  sfx('buy'); toast(`Bought ${r.n} tool upgrade${r.n === 1 ? '' : 's'} across ${r.skills} skill${r.skills === 1 ? '' : 's'} for ${fmt(r.cost)} gp.`); render();
+};
 document.querySelectorAll('.seg button').forEach(b => b.onclick = () => { S.buy = b.dataset.amt; render(); });
 $('toolBuy').onclick = () => {
   const st = S.s[S.sel], t = st.tool + 1;
@@ -746,7 +785,10 @@ function render() {
     const n = buyCount(i, st.w[i]), cost = workerCost(i, st.w[i], n);
     w.cnt.textContent = st.w[i];
     setBuy(w.btn, cost, S.gp >= cost, (n > 1 ? `×${n} · ` : '') + fmt(cost) + ' gp');
+    const amt = S.buy === 'max' ? 1 : +S.buy;
+    w.all.disabled = !SKILLS.some(s => workerCost(i, S.s[s.id].w[i], amt) <= S.gp);
   });
+  $('toolAll').disabled = !SKILLS.some(s => toolReady(s.id) <= S.gp);
   document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.amt === S.buy));
   // global upgrades
   tierItem('cp', CP, (cur, nx) => nx ? `Each click performs ${nx.v} actions (now ${cur.v}).` : `Each click performs ${cur.v} actions.`);
