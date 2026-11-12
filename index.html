@@ -154,9 +154,10 @@ textarea{width:100%;height:64px;background:var(--edge-dark);color:var(--ink);bor
 footer{font-size:12px;color:var(--ink-dim);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:flex-start}
 footer details{max-width:520px;flex:1 1 300px}
 
-#toasts{position:fixed;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;z-index:10;max-width:min(360px,calc(100vw - 32px))}
-.toast{background:#17140f;border:1px solid var(--gold);border-radius:4px;padding:8px 12px;font-size:13.5px;animation:pop .2s ease-out}
-@keyframes pop{from{transform:translateY(8px);opacity:0}}
+#toasts{position:fixed;left:16px;bottom:16px;display:flex;flex-direction:column;gap:10px;z-index:10;max-width:min(480px,calc(100vw - 32px))}
+.toast{background:#17140f;border:2px solid var(--gold);border-left-width:8px;border-radius:6px;padding:14px 18px;font-size:17px;font-weight:500;line-height:1.35;color:#fff6da;
+  box-shadow:0 0 0 2px var(--edge-dark),0 8px 28px rgba(0,0,0,.65),0 0 22px rgba(255,210,58,.28);animation:pop .3s cubic-bezier(.2,1.5,.4,1)}
+@keyframes pop{from{transform:translateY(16px) scale(.9);opacity:0}}
 #fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 
 @media (max-width:1080px){main{grid-template-columns:260px minmax(0,1fr)} #shop{grid-column:1 / -1}}
@@ -237,7 +238,7 @@ footer details{max-width:520px;flex:1 1 300px}
 <div id="v-boss" class="cols" hidden>
   <section class="panel">
     <h2>Boss ladder</h2>
-    <p class="lead">Your seven combat skills fight for you around the clock. A boss must go down within 60 seconds, so if your damage is too low the fight never finishes. Every kill pays gp and has a 1 in 8 chance at the boss's unique drop, which adds 3% to all XP and gp for good.</p>
+    <p class="lead">Your seven combat skills fight for you around the clock. A boss must go down within 60 seconds, so if your damage is too low the fight never finishes. Every kill pays gp and has a 1 in 50 chance at the boss's unique drop, which adds 3% to all XP and gp for good.</p>
     <div id="bossFace">🐀</div>
     <h2 id="bossName"></h2>
     <div class="xpbar" style="margin:10px auto"><div class="track hp"><i id="bossFill"></i></div><p id="bossText" class="num" style="text-align:center"></p></div>
@@ -394,7 +395,24 @@ const QUESTS = [
   { id:'ship', n:"The Shipwright's Dream", req:{ sail:50, con:50, craft:50 }, gp:5e6, r:'Unlocks the Guild Contract worker (40 actions per second) for every skill.' },
   { id:'jack', n:'Jack of All Trades', all:60, gp:20e6, r:'All XP and gp +10%.' },
   { id:'master', n:'Master of All', all:99, gp:1e9, r:'All XP and gp +25%.' },
-];
+  { id:'restless', n:'Restless Bones', req:{ slay:25, pray:25 }, gp:20e3, r:'Slayer and Prayer give 15% more XP.' },
+  { id:'coin', n:'The Lucky Coin', req:{ thv:30, craft:30 }, gp:60e3, r:'Boss drops are twice as likely (1 in 25).' },
+  { id:'quiver', n:"The Fletcher's Quiver", req:{ fletch:35, rng:35 }, gp:80e3, r:'Fletching banks 2 arrows per action.' },
+  { id:'vein', n:'The Deep Vein', req:{ min:45, smi:45 }, gp:250e3, r:'Mining banks 2 ore per action.' },
+  { id:'purse', n:"The Pickpocket's Purse", req:{ thv:55, hunt:50 }, gp:800e3, r:'Thieving and Hunter give 25% more gp.' },
+  { id:'harvest', n:'The Golden Harvest', req:{ farm:55, herb:50, cook:50 }, gp:1.5e6, r:'Every skill gives 10% more gp.' },
+  { id:'arcane', n:'The Arcane Apprentice', req:{ mag:60, rc:55, pray:50 }, gp:3e6, r:'Double XP and click frenzy events last twice as long.' },
+  { id:'trail', n:'Trailblazer', req:{ agi:60, hunt:55, wc:55 }, gp:4e6, r:'Pets are twice as likely to appear.' },
+  { id:'trial', n:'Trial by Fire', req:{ fm:60, atk:60, def:60 }, gp:6e6, r:'Bosses pay double gp.' },
+  { id:'ledger', n:"The Guildmaster's Ledger", req:{ con:70, craft:65, smi:65 }, gp:15e6, r:'All automation costs 10% less.' },
+  { id:'voyage', n:'Voyage to the Edge', req:{ sail:75, fish:70, agi:65 }, gp:40e6, r:'Automation in every skill works 10% faster.' },
+  { id:'champion', n:'Champion of the Ladder', req:{ atk:80, str:80, def:80, rng:80, mag:80, pray:80, hp:80 }, gp:100e6, r:'You deal another 50% more damage to bosses.' },
+  { id:'complete', n:'Completionist', all:110, gp:10e9, r:'All XP and gp +50%.' },
+].sort((a, b) => a.gp - b.gp);
+const dropOdds = () => S.q.coin ? 25 : 50;
+const prodMul = id => (id === 'wc' && S.q.lodge) || (id === 'fletch' && S.q.quiver) || (id === 'min' && S.q.vein) ? 2 : 1;
+const costMul = () => S.q.ledger ? .9 : 1;
+const bossGp = b => b.gp * G * (S.q.trial ? 2 : 1);
 
 /* ---------- state ---------- */
 const fresh = () => ({ v:2, gp:0, sel:'wc', cp:0, syn:0, ev:0, buy:'1', t:Date.now(), buff:0, frenzy:0, renown:0, mute:false, lbKey:'', lbName:'', peakLevel:24,
@@ -417,16 +435,17 @@ function recalcGlobal() {
   totalLevel = 0; for (const k of SKILLS) totalLevel += LV[k.id];
   if (totalLevel > S.peakLevel) S.peakLevel = totalLevel;
   G = (1 + .002 * (totalLevel - SKILLS.length)) * (1 + .05 * capes()) * (1 + .01 * count(S.ach)) * (1 + .03 * count(S.boss.drops))
-    * (1 + .05 * S.renown) * (S.q.jack ? 1.1 : 1) * (S.q.master ? 1.25 : 1);
+    * (1 + .05 * S.renown) * (S.q.jack ? 1.1 : 1) * (S.q.master ? 1.25 : 1) * (S.q.complete ? 1.5 : 1);
 }
 function calc(id) {
   const k = BYID[id], st = S.s[id], l = LV[id];
   let auto = 0; for (let i = 0; i < WORKERS.length; i++) auto += st.w[i] * WORKERS[i].r;
   if (S.q.smith && (id === 'min' || id === 'smi')) auto *= 1.2;
+  if (S.q.voyage) auto *= 1.1;
   const own = S.pets[id] ? 1.1 : 1;
   return {
-    xp: XP_BASE * k.xm * Math.pow(XP_LVL, l - 1) * Math.pow(TOOL_XP, st.tool) * G * own * (S.buff > 0 ? 2 : 1) * (S.q.lunch && (id === 'fish' || id === 'cook') ? 1.15 : 1),
-    gp: k.gm * Math.pow(GP_LVL, l - 1) * Math.pow(TOOL_GP, st.tool) * G * own,
+    xp: XP_BASE * k.xm * Math.pow(XP_LVL, l - 1) * Math.pow(TOOL_XP, st.tool) * G * own * (S.buff > 0 ? 2 : 1) * (S.q.lunch && (id === 'fish' || id === 'cook') ? 1.15 : 1) * (S.q.restless && (id === 'slay' || id === 'pray') ? 1.15 : 1),
+    gp: k.gm * Math.pow(GP_LVL, l - 1) * Math.pow(TOOL_GP, st.tool) * G * own * (S.q.harvest ? 1.1 : 1) * (S.q.purse && (id === 'thv' || id === 'hunt') ? 1.25 : 1),
     auto,
   };
 }
@@ -434,9 +453,9 @@ const clickActs = c => (CP[S.cp].v + (S.q.essence ? 2 : 0) + SYN[S.syn].v / 100 
 function act(id, acts, c) { // perform `acts` actions of a skill
   let m = 1; const p = CONS[id];
   if (p) { const used = Math.min(S.res[p], acts); S.res[p] -= used; m = 1 + supBonus() * used / acts; }
-  if (PROD[id]) S.res[id] += acts * (id === 'wc' && S.q.lodge ? 2 : 1);
+  if (PROD[id]) S.res[id] += acts * prodMul(id);
   gain(c.gp * acts * m); addXp(id, c.xp * acts * m);
-  if (!S.pets[id] && Math.random() < 1 - Math.exp(-acts * LV[id] / 1e7)) {
+  if (!S.pets[id] && Math.random() < 1 - Math.exp(-acts * LV[id] / 1e7 * (S.q.trail ? 2 : 1))) {
     S.pets[id] = 1; dirtySkills = true;
     toast(`${BYID[id].pi} You have a funny feeling like you're being followed. ${BYID[id].pn} the ${BYID[id].name} pet joins you: +10% XP and gp in ${BYID[id].name}.`, 9000); sfx('pet');
   }
@@ -457,12 +476,12 @@ function onLevel(id, old, now) {
     if (id === S.sel) { clicker.classList.remove('ding'); void clicker.offsetWidth; clicker.classList.add('ding'); }
   }
 }
-const bossDps = () => { let s = 0; for (const id of COMBAT) s += LV[id]; return s * s / 50 * (S.q.contract ? 1.5 : 1); };
+const bossDps = () => { let s = 0; for (const id of COMBAT) s += LV[id]; return s * s / 50 * (S.q.contract ? 1.5 : 1) * (S.q.champion ? 1.5 : 1); };
 function bossKills(k) {
   const i = S.boss.i, b = BOSSES[i];
-  gain(k * b.gp * G); S.st.kills += k;
+  gain(k * bossGp(b)); S.st.kills += k;
   if (i === BOSSES.length - 1) S.bossLast = 1;
-  if (!S.boss.drops[i] && Math.random() < 1 - Math.pow(7 / 8, k)) { S.boss.drops[i] = 1; recalcGlobal(); toast(`${b.icon} ${b.n} dropped the ${b.drop}: +3% to all XP and gp.`, 8000); sfx('pet'); }
+  if (!S.boss.drops[i] && Math.random() < 1 - Math.pow(1 - 1 / dropOdds(), k)) { S.boss.drops[i] = 1; recalcGlobal(); toast(`${b.icon} ${b.n} dropped the ${b.drop}: +3% to all XP and gp.`, 8000); sfx('pet'); }
   if (i === S.boss.max && i < BOSSES.length - 1) { S.boss.max++; if (bossDps() * 60 >= BOSSES[i + 1].hp) { S.boss.i++; S.boss.prog = 0; } if (!quiet) toast(`${b.icon} ${b.n} defeated. ${BOSSES[i + 1].n} is now on the ladder.`, 6000); }
 }
 function advance(dt) { // run automation for dt seconds
@@ -479,14 +498,14 @@ function advance(dt) { // run automation for dt seconds
   }
 }
 const workerOn = i => !WORKERS[i].quest || S.q[WORKERS[i].quest];
-const workerCost = (i, owned, n) => { let c = 0; for (let j = 0; j < n; j++) c += WORKERS[i].c * Math.pow(W_GROW, owned + j); return Math.ceil(c); };
+const workerCost = (i, owned, n) => { let c = 0; for (let j = 0; j < n; j++) c += WORKERS[i].c * costMul() * Math.pow(W_GROW, owned + j); return Math.ceil(c); };
 function buyCount(i, owned) {
   if (S.buy !== 'max') return +S.buy;
   let n = 0, gp = S.gp;
-  while (n < 500) { const c = Math.ceil(WORKERS[i].c * Math.pow(W_GROW, owned + n)); if (gp < c) break; gp -= c; n++; }
+  while (n < 500) { const c = Math.ceil(WORKERS[i].c * costMul() * Math.pow(W_GROW, owned + n)); if (gp < c) break; gp -= c; n++; }
   return Math.max(1, n);
 }
-const nextWorkerCost = (i, id) => Math.ceil(WORKERS[i].c * Math.pow(W_GROW, S.s[id].w[i]));
+const nextWorkerCost = (i, id) => Math.ceil(WORKERS[i].c * costMul() * Math.pow(W_GROW, S.s[id].w[i]));
 function bulkWorkers(i) { // buy worker i for every skill, cheapest first, using the selected buy amount
   let n = 0, cost = 0; const touched = {};
   if (S.buy === 'max') {
@@ -674,7 +693,7 @@ function floater(e, text) {
   document.body.appendChild(f); floats++;
   setTimeout(() => { f.remove(); floats--; }, 800);
 }
-function toast(msg, ms = 4000) {
+function toast(msg, ms = 5000) {
   const t = document.createElement('div'); t.className = 'toast'; t.textContent = msg;
   const box = $('toasts'); box.appendChild(t); while (box.children.length > 4) box.firstChild.remove();
   setTimeout(() => t.remove(), ms);
@@ -685,8 +704,9 @@ const eventGap = () => (120 + Math.random() * 180) * Math.pow(.85, S.ev) * (S.q.
 $('event').onclick = () => {
   eventLeft = 0; $('event').classList.remove('on'); S.st.events++; sfx('pet');
   const roll = Math.floor(Math.random() * 5), k = BYID[S.sel], c = calc(S.sel);
-  if (roll === 0) { S.buff = 60; toast('Random event: double XP in every skill for 60 seconds.', 6000); }
-  else if (roll === 1) { S.frenzy = 20; toast('Random event: click frenzy. Clicks count 7 times for 20 seconds.', 6000); }
+    const long = S.q.arcane ? 2 : 1;
+  if (roll === 0) { S.buff = 60 * long; toast(`Random event: double XP in every skill for ${60 * long} seconds.`, 6000); }
+  else if (roll === 1) { S.frenzy = 20 * long; toast(`Random event: click frenzy. Clicks count 7 times for ${20 * long} seconds.`, 6000); }
   else if (roll === 2) {
     for (const p in PROD) S.res[p] += Math.max(500, calc(p).auto * 120);
     toast('Random event: a supply ship docks and tops up every stockpile.', 6000);
@@ -765,7 +785,7 @@ function render() {
   if (p) { const [rn] = PROD[p], pct = Math.round(supBonus() * 100);
     sup += stocked ? `Supplied: uses 1 of your <b>${fmt(S.res[p])} ${rn}</b> per action for +${pct}% XP and gp. `
                    : `<span class="c-bad">Out of ${rn}.</span> Train ${BYID[p].name} to stock up and earn +${pct}% XP and gp here. `; }
-  if (PROD[id]) sup += `Each action banks ${id === 'wc' && S.q.lodge ? 2 : 1} ${PROD[id][0]} for ${listNames(PROD[id][1])}. In the bank: <b>${fmt(S.res[id])}</b>.`;
+  if (PROD[id]) sup += `Each action banks ${prodMul(id)} ${PROD[id][0]} for ${listNames(PROD[id][1])}. In the bank: <b>${fmt(S.res[id])}</b>.`;
   setHTML($('supply'), sup);
   // tool
   const ti = $('toolItem'), nt = st.tool + 1;
@@ -820,7 +840,7 @@ function renderView() {
     $('bossText').textContent = can ? `${fmt(Math.max(0, b.hp - S.boss.prog))} / ${fmt(b.hp)} HP` : `Too strong. It needs ${fmt(b.hp / 60)} damage per second and you deal ${fmtR(dps)}.`;
     $('bossPrev').disabled = i === 0; $('bossNext').disabled = i >= S.boss.max;
     setHTML($('bossTiles'), tile(fmtR(dps), 'damage per second') + tile(can ? fmtT(b.hp / dps) : 'Never', 'time per kill', can ? '' : 'c-bad')
-      + tile(fmt(b.gp * G), 'gp per kill', 'c-gp') + tile(S.boss.drops[i] ? 'Owned' : '1 in 8', b.drop, S.boss.drops[i] ? 'c-xp' : '')
+      + tile(fmt(bossGp(b)), 'gp per kill', 'c-gp') + tile(S.boss.drops[i] ? 'Owned' : '1 in ' + dropOdds(), b.drop, S.boss.drops[i] ? 'c-xp' : '')
       + tile(COMBAT.reduce((a, id) => a + LV[id], 0), 'combined combat levels') + tile(fmt(S.st.kills), 'bosses defeated'));
     setHTML($('ladder'), BOSSES.map((x, j) => `<div class="item ${j === i ? 'cur' : ''} ${j > S.boss.max ? 'lock' : ''}"><span style="font-size:22px">${x.icon}</span><div class="t">${x.n}</div>`
       + `<span class="num ${S.boss.drops[j] ? 'c-xp' : ''}" style="font-size:12.5px">${S.boss.drops[j] ? x.drop : j > S.boss.max ? 'Locked' : 'No drop yet'}</span>`
