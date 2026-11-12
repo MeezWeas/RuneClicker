@@ -8,10 +8,11 @@
 <link href="https://fonts.googleapis.com/css2?family=Pixelify+Sans:wght@500;700&family=DM+Sans:wght@400;500;700&display=swap" rel="stylesheet">
 <style>
 :root{
-  /* layout: header strip, then three columns (skill tab | training spot | shop); stacks on phones */
+  /* layout: header strip, view tabs, then three columns (skill tab | training spot | shop); stacks on phones */
   --stone:#221e19; --panel:#342d25; --panel-hi:#40372d; --edge:#5e5240; --edge-dark:#15120f;
   --ink:#eadfc4; --ink-dim:#a89c82; --gold:#ffd23a; --xp:#62d26f; --accent:#ff981f; --bad:#e2573f;
-  --display:"Pixelify Sans","Trebuchet MS",system-ui,sans-serif;
+  --pixel:"Pixelify Sans","Trebuchet MS",system-ui,sans-serif;
+  --display:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   --body:"DM Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
   color-scheme:dark;
 }
@@ -21,6 +22,9 @@ body{background:var(--stone);color:var(--ink);font-family:var(--body);font-size:
   background-image:radial-gradient(circle at 20% 0%,#2e2820 0,transparent 55%),radial-gradient(circle at 90% 100%,#2a241d 0,transparent 50%)}
 button{font:inherit;color:inherit;cursor:pointer}
 button:focus-visible,textarea:focus-visible,summary:focus-visible{outline:2px solid var(--gold);outline-offset:2px}
+[hidden]{display:none !important}
+h1,h2,nav button{font-family:var(--pixel) !important}
+.sk .lv,#lvl,.item .t em,td.lv,.float,.big{font-weight:700}
 .num{font-variant-numeric:tabular-nums}
 .wrap{max-width:1240px;margin:0 auto;padding:16px;display:flex;flex-direction:column;gap:14px}
 
@@ -28,17 +32,24 @@ header{display:flex;flex-wrap:wrap;align-items:center;gap:10px 22px;background:v
   box-shadow:inset 0 0 0 2px var(--edge-dark);padding:12px 16px;border-radius:6px}
 h1{font-family:var(--display);font-size:28px;margin:0;color:var(--accent);letter-spacing:.5px;line-height:1}
 h1 small{display:block;font-family:var(--body);font-size:12px;color:var(--ink-dim);font-weight:400;letter-spacing:0;margin-top:4px}
-.stats{display:flex;flex-wrap:wrap;gap:8px 22px;margin-left:auto}
+.stats{display:flex;flex-wrap:wrap;gap:8px 22px;margin-left:auto;align-items:center}
 .stat{display:flex;flex-direction:column}
 .stat b{font-family:var(--display);font-size:22px;line-height:1.1}
 .stat span{font-size:12px;color:var(--ink-dim)}
 #gp{color:var(--gold)}
-#buff{color:var(--xp)}
+#buff{color:var(--xp);font-size:16px}
+
+nav{display:flex;flex-wrap:wrap;gap:6px}
+nav button{background:var(--panel);border:2px solid var(--edge);border-radius:6px;padding:7px 14px;font-family:var(--display);font-size:16px;color:var(--ink-dim)}
+nav button:hover{color:var(--ink)}
+nav button[aria-pressed="true"]{color:var(--accent);border-color:var(--accent);background:var(--panel-hi)}
+nav button i{font-style:normal;color:var(--gold);margin-left:6px}
 
 main{display:grid;grid-template-columns:300px minmax(0,1fr) 370px;gap:14px;align-items:start}
 .panel{background:var(--panel);border:2px solid var(--edge);box-shadow:inset 0 0 0 2px var(--edge-dark);border-radius:6px;padding:14px}
 h2{font-family:var(--display);font-size:18px;margin:0 0 10px;color:var(--accent);font-weight:700}
 h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-dim);margin:16px 0 8px;font-weight:700}
+.lead{color:var(--ink-dim);max-width:70ch;margin:0 0 12px}
 
 /* skill tab */
 #skills{display:grid;grid-template-columns:repeat(3,1fr);gap:6px}
@@ -52,6 +63,7 @@ h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-
 .sk .bar{width:86%;height:3px;background:var(--edge-dark);border-radius:2px;margin-top:3px;overflow:hidden}
 .sk .bar i{display:block;height:100%;background:var(--xp);width:0}
 .sk .gear{position:absolute;top:2px;right:4px;font-size:10px;color:var(--ink-dim)}
+.sk .pet{position:absolute;top:1px;left:3px;font-size:11px}
 .hint{font-size:12.5px;color:var(--ink-dim);margin:10px 0 0}
 
 /* training spot */
@@ -63,51 +75,92 @@ h3{font-size:12px;text-transform:uppercase;letter-spacing:.08em;color:var(--ink-
   user-select:none;-webkit-user-select:none;touch-action:manipulation;transition:transform .06s}
 #clicker:hover{border-color:var(--gold)}
 #clicker:active{transform:translateY(4px) scale(.97);box-shadow:0 2px 0 var(--edge-dark),inset 0 0 0 3px var(--edge-dark)}
+#clicker.ding{animation:ding .5s ease-out}
+@keyframes ding{0%{box-shadow:0 6px 0 var(--edge-dark),0 0 0 0 var(--gold)}100%{box-shadow:0 6px 0 var(--edge-dark),0 0 0 28px transparent}}
 .xpbar{width:100%;max-width:440px}
-.xpbar .track{height:16px;background:var(--edge-dark);border:1px solid var(--edge);border-radius:3px;overflow:hidden}
-.xpbar .track i{display:block;height:100%;background:linear-gradient(#7be087,#3fae4e);width:0}
+.track{height:16px;background:var(--edge-dark);border:1px solid var(--edge);border-radius:3px;overflow:hidden}
+.track i{display:block;height:100%;background:linear-gradient(#7be087,#3fae4e);width:0}
+.track.hp i{background:linear-gradient(#f0705a,#b93a27)}
 .xpbar p{margin:5px 0 0;font-size:12.5px;color:var(--ink-dim)}
+#supply{font-size:12.5px;color:var(--ink-dim);max-width:440px;margin:0}
+#supply b{color:var(--ink)}
 .yield{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;width:100%;max-width:440px}
-.yield div{background:var(--panel-hi);border:1px solid var(--edge);border-radius:4px;padding:8px}
-.yield b{display:block;font-family:var(--display);font-size:19px}
-.yield span{font-size:12px;color:var(--ink-dim)}
-.c-xp{color:var(--xp)} .c-gp{color:var(--gold)}
+.yield div,.tile{background:var(--panel-hi);border:1px solid var(--edge);border-radius:4px;padding:8px}
+.yield b,.tile b{display:block;font-family:var(--display);font-size:19px}
+.yield span,.tile span{font-size:12px;color:var(--ink-dim)}
+.c-xp{color:var(--xp)} .c-gp{color:var(--gold)} .c-bad{color:var(--bad)}
 .float{position:fixed;pointer-events:none;font-family:var(--display);font-size:18px;color:var(--xp);text-shadow:0 2px 0 #000;animation:rise .8s ease-out forwards;z-index:5}
 @keyframes rise{to{transform:translateY(-70px);opacity:0}}
 #event{display:none;background:var(--gold);color:#2a2000;border:2px solid #fff3b0;border-radius:6px;padding:8px 14px;font-weight:700;animation:bob 1s ease-in-out infinite alternate}
 #event.on{display:block}
 @keyframes bob{to{transform:translateY(-5px)}}
 
-/* shop */
+/* shop and list items */
 .item{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;background:var(--panel-hi);border:1px solid var(--edge);border-radius:4px;padding:9px 10px;margin-bottom:6px}
 .item .t{font-weight:700}
 .item .t em{font-style:normal;color:var(--gold);font-family:var(--display);margin-left:6px}
 .item .d{font-size:12.5px;color:var(--ink-dim);grid-column:1}
 .item .buy{grid-column:2;grid-row:1 / span 2}
+.item.done{opacity:.6}
 .buy{background:#5b4a22;border:1px solid var(--gold);color:var(--gold);border-radius:4px;padding:7px 10px;font-weight:700;min-width:104px;font-size:13.5px}
 .buy:hover:not(:disabled){background:#75602a}
 .buy:disabled{border-color:var(--edge);color:var(--ink-dim);background:transparent;cursor:not-allowed}
 .seg{display:inline-flex;border:1px solid var(--edge);border-radius:4px;overflow:hidden;margin-left:8px;vertical-align:middle}
 .seg button{background:transparent;border:0;padding:2px 9px;font-size:12px;color:var(--ink-dim)}
 .seg button[aria-pressed="true"]{background:var(--edge);color:var(--ink)}
-.row{display:flex;align-items:center;justify-content:space-between}
+.row{display:flex;align-items:center;justify-content:space-between;gap:10px;flex-wrap:wrap}
+.met{color:var(--xp)} .unmet{color:var(--bad)}
+
+/* other views */
+.cols{display:grid;grid-template-columns:minmax(0,1fr) minmax(0,1fr);gap:14px;align-items:start}
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:6px}
+.ach{background:var(--panel-hi);border:1px solid var(--edge);border-radius:4px;padding:8px 10px;font-size:13px;color:var(--ink-dim)}
+.ach b{display:block;color:var(--ink-dim);font-size:14px}
+.ach.on{border-color:var(--gold)} .ach.on b{color:var(--gold)}
+.pets{display:grid;grid-template-columns:repeat(auto-fill,minmax(104px,1fr));gap:6px}
+.petc{background:var(--panel-hi);border:1px solid var(--edge);border-radius:4px;padding:6px;text-align:center;font-size:12px;color:var(--ink-dim)}
+.petc span{display:block;font-size:24px;filter:grayscale(1) brightness(.4)}
+.petc.on{border-color:var(--xp);color:var(--ink)} .petc.on span{filter:none}
+.tiles{display:grid;grid-template-columns:repeat(auto-fill,minmax(150px,1fr));gap:8px}
+.scroll{overflow-x:auto}
+table{border-collapse:collapse;width:100%;font-size:13.5px;min-width:560px}
+th,td{padding:5px 8px;text-align:right;border-bottom:1px solid var(--edge);white-space:nowrap}
+th{font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:var(--ink-dim)}
+th:first-child,td:first-child{text-align:left}
+td.lv{font-family:var(--display);color:var(--gold);font-size:15px}
+input[type=text]{background:var(--edge-dark);color:var(--ink);border:1px solid var(--edge);border-radius:4px;padding:7px 9px;font:inherit;width:200px;max-width:100%}
+.sortb{background:transparent;border:0;padding:0;font:inherit;letter-spacing:inherit;text-transform:inherit;color:var(--ink-dim);text-decoration:underline}
+.sortb[aria-pressed="true"]{color:var(--gold)}
+#lbTable td:nth-child(2),#lbTable th:nth-child(2){text-align:left}
+#lbTable tr.me td{background:#4d4232;color:var(--gold)}
+#bossFace{font-size:96px;line-height:1.1;text-align:center}
+#bossName{font-size:24px;text-align:center;margin:0}
+.ladder .item{grid-template-columns:auto minmax(0,1fr) auto}
+.ladder .item .d{grid-column:2}
+.ladder .item.cur{border-color:var(--gold)}
+.ladder .lock{opacity:.45}
+.plainbtn,.plain{background:transparent;border:1px solid var(--edge);border-radius:4px;padding:5px 10px;font-size:13px}
+.plain{margin-right:6px}
+.plainbtn:hover:not(:disabled),.plain:hover{border-color:var(--ink-dim)}
+.plainbtn:disabled{opacity:.4;cursor:not-allowed}
+.plain.warn{color:var(--bad);border-color:var(--bad)}
+.big{font-family:var(--display);font-size:34px;color:var(--gold);line-height:1}
 
 details{font-size:13px;color:var(--ink-dim)}
 summary{cursor:pointer;color:var(--ink)}
 textarea{width:100%;height:64px;background:var(--edge-dark);color:var(--ink);border:1px solid var(--edge);border-radius:4px;font:12px ui-monospace,monospace;margin:8px 0;padding:6px}
-.plain{background:transparent;border:1px solid var(--edge);border-radius:4px;padding:5px 10px;font-size:13px;margin-right:6px}
-.plain:hover{border-color:var(--ink-dim)}
-.plain.warn{color:var(--bad);border-color:var(--bad)}
 footer{font-size:12px;color:var(--ink-dim);display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;align-items:flex-start}
 footer details{max-width:520px;flex:1 1 300px}
 
 #toasts{position:fixed;left:16px;bottom:16px;display:flex;flex-direction:column;gap:6px;z-index:10;max-width:min(360px,calc(100vw - 32px))}
 .toast{background:#17140f;border:1px solid var(--gold);border-radius:4px;padding:8px 12px;font-size:13.5px;animation:pop .2s ease-out}
 @keyframes pop{from{transform:translateY(8px);opacity:0}}
+#fx{position:fixed;inset:0;width:100%;height:100%;pointer-events:none;z-index:20}
 
 @media (max-width:1080px){main{grid-template-columns:260px minmax(0,1fr)} #shop{grid-column:1 / -1}}
+@media (max-width:800px){.cols{grid-template-columns:minmax(0,1fr)}}
 @media (max-width:700px){main{grid-template-columns:minmax(0,1fr)} #stage{order:-1} #skills{grid-template-columns:repeat(4,1fr)} .stats{margin-left:0} #clicker{width:180px;height:180px;font-size:88px}}
-@media (prefers-reduced-motion:reduce){.float,#event,.toast{animation:none} .float{display:none}}
+@media (prefers-reduced-motion:reduce){.float,#event,.toast,#clicker.ding{animation:none} .float{display:none}}
 </style>
 </head>
 <body>
@@ -119,11 +172,22 @@ footer details{max-width:520px;flex:1 1 300px}
     <div class="stat"><b id="gps" class="num">0</b><span>gp per second</span></div>
     <div class="stat"><b id="total" class="num">24</b><span>total level</span></div>
     <div class="stat"><b id="bonus" class="num">+0%</b><span>account bonus</span></div>
-    <div class="stat" id="buffBox" hidden><b id="buff" class="num">0s</b><span>double XP</span></div>
+    <div class="stat" id="buffBox" hidden><b id="buff" class="num"></b><span>active boosts</span></div>
+    <button class="plainbtn" id="mute" aria-pressed="false">Sound: on</button>
   </div>
 </header>
 
-<main>
+<nav aria-label="Views">
+  <button data-view="train" aria-pressed="true">Train</button>
+  <button data-view="boss" aria-pressed="false">Bosses</button>
+  <button data-view="quests" aria-pressed="false">Quests<i id="qBadge"></i></button>
+  <button data-view="ach" aria-pressed="false">Achievements</button>
+  <button data-view="scores" aria-pressed="false">Hiscores</button>
+  <button data-view="lb" aria-pressed="false">Leaderboard</button>
+  <button data-view="prestige" aria-pressed="false">Prestige<i id="pBadge"></i></button>
+</nav>
+
+<main id="v-train">
   <section class="panel" aria-label="Skills">
     <h2>Skills</h2>
     <div id="skills"></div>
@@ -147,6 +211,7 @@ footer details{max-width:520px;flex:1 1 300px}
       <div><b id="yAuto" class="num">0</b><span>automated actions per second</span></div>
       <div><b id="yXps" class="c-xp num">0</b><span>XP per second from automation</span></div>
     </div>
+    <p id="supply"></p>
   </section>
 
   <section class="panel" id="shop" aria-label="Shop">
@@ -160,11 +225,86 @@ footer details{max-width:520px;flex:1 1 300px}
       </div></div>
     <div id="workers"></div>
 
-    <h3>Clicking (all skills)</h3>
+    <h3>Clicking and events (all skills)</h3>
     <div class="item" id="cpItem"><div class="t"></div><div class="d"></div><button class="buy num" id="cpBuy"></button></div>
     <div class="item" id="synItem"><div class="t"></div><div class="d"></div><button class="buy num" id="synBuy"></button></div>
+    <div class="item" id="evItem"><div class="t"></div><div class="d"></div><button class="buy num" id="evBuy"></button></div>
   </section>
 </main>
+
+<div id="v-boss" class="cols" hidden>
+  <section class="panel">
+    <h2>Boss ladder</h2>
+    <p class="lead">Your seven combat skills fight for you around the clock. A boss must go down within 60 seconds, so if your damage is too low the fight never finishes. Every kill pays gp and has a 1 in 8 chance at the boss's unique drop, which adds 3% to all XP and gp for good.</p>
+    <div id="bossFace">🐀</div>
+    <h2 id="bossName"></h2>
+    <div class="xpbar" style="margin:10px auto"><div class="track hp"><i id="bossFill"></i></div><p id="bossText" class="num" style="text-align:center"></p></div>
+    <div class="row" style="justify-content:center"><button class="plainbtn" id="bossPrev">Previous boss</button><button class="plainbtn" id="bossNext">Next boss</button></div>
+    <div class="tiles" style="margin-top:12px" id="bossTiles"></div>
+  </section>
+  <section class="panel ladder">
+    <h2>The ladder</h2>
+    <div id="ladder"></div>
+  </section>
+</div>
+
+<div id="v-quests" hidden>
+  <section class="panel">
+    <h2>Quests</h2>
+    <p class="lead">Each quest is done once and its reward is permanent, even through prestige.</p>
+    <div id="questList"></div>
+  </section>
+</div>
+
+<div id="v-ach" hidden>
+  <section class="panel">
+    <h2>Achievements <span id="achCount" class="num" style="color:var(--ink-dim)"></span></h2>
+    <p class="lead">Each achievement adds 1% to all XP and gp, permanently.</p>
+    <div class="grid" id="achGrid"></div>
+    <h2 style="margin-top:18px">Pets <span id="petCount" class="num" style="color:var(--ink-dim)"></span></h2>
+    <p class="lead">Every action has a tiny chance to find that skill's pet, and the chance grows with your level. A pet adds 10% XP and gp in its skill, permanently.</p>
+    <div class="pets" id="petGrid"></div>
+  </section>
+</div>
+
+<div id="v-scores" hidden>
+  <section class="panel">
+    <h2>Hiscores</h2>
+    <div class="scroll"><table><thead><tr><th>Skill</th><th>Level</th><th>XP</th><th>XP per hour</th><th>gp per hour</th><th>Tool</th><th>Workers</th><th>Pet</th></tr></thead><tbody id="scoreBody"></tbody></table></div>
+    <h2 style="margin-top:18px">Stats</h2>
+    <div class="tiles" id="statTiles"></div>
+  </section>
+</div>
+
+<div id="v-lb" hidden>
+  <section class="panel">
+    <h2>Leaderboard</h2>
+    <p class="lead">The top 100 players. Your best total level, highest boss defeated, lifetime gp and lifetime XP are sent every two minutes once you join. Click a column heading to rank by it.</p>
+    <div class="row" style="justify-content:flex-start;margin-bottom:10px">
+      <label for="lbName">Display name</label>
+      <input type="text" id="lbName" maxlength="16" autocomplete="off" spellcheck="false">
+      <button class="buy" id="lbJoin">Join leaderboard</button>
+      <button class="plainbtn" id="lbRefresh">Refresh</button>
+    </div>
+    <p class="hint" id="lbMsg" style="margin:0 0 10px"></p>
+    <div class="scroll"><table id="lbTable"><thead><tr><th>#</th><th>Player</th>
+      <th><button class="sortb" data-sort="total_level" aria-pressed="true">Total level</button></th>
+      <th><button class="sortb" data-sort="best_boss" aria-pressed="false">Best boss kill</button></th>
+      <th><button class="sortb" data-sort="total_gp" aria-pressed="false">Total gp</button></th>
+      <th><button class="sortb" data-sort="total_xp" aria-pressed="false">Total XP</button></th>
+    </tr></thead><tbody id="lbBody"></tbody></table></div>
+  </section>
+</div>
+
+<div id="v-prestige" hidden>
+  <section class="panel">
+    <h2>Prestige</h2>
+    <p class="lead">Start over on a fresh account and carry Renown with you. Each point of Renown adds 5% to all XP and gp, forever. You need total level 1,000 to prestige, and the more XP you earned this run, the more Renown you get.</p>
+    <div class="tiles" id="presTiles"></div>
+    <p class="lead" style="margin-top:12px"><b style="color:var(--ink)">You keep:</b> Renown, achievements, pets, quest rewards, boss drops and stats. <b style="color:var(--ink)">You lose:</b> gp, levels, tools, automation, stockpiles, and the clicking and event upgrades.</p>
+    <button class="buy" id="presBtn"></button>
+  </section>
+</div>
 
 <footer>
   <details>
@@ -176,27 +316,39 @@ footer details{max-width:520px;flex:1 1 300px}
   <span>A fan-made game inspired by Old School RuneScape and Cookie Clicker. Not affiliated with Jagex or Orteil.</span>
 </footer>
 </div>
+<canvas id="fx" hidden></canvas>
 <div id="toasts" aria-live="polite"></div>
 
 <script>
 'use strict';
+/* ---------- leaderboard config: paste your Supabase project URL and publishable key here ---------- */
+const SUPABASE_URL = 'https://npaouqekncnjifdwjwvw.supabase.co';   // e.g. 'https://abcdefghijkl.supabase.co'
+const SUPABASE_KEY = 'sb_publishable_2wxlh85ABSwpuqDver9GyA_xxC-Q6qU';   // the publishable key, starts with 'sb_publishable_' (never the secret key)
+
 /* ---------- data ---------- */
 const MAXL = 126, XPCAP = 200e6;
 const XP = [0, 0]; // XP[l] = total xp needed for level l (OSRS formula)
 { let s = 0; for (let l = 1; l < MAXL; l++) { s += Math.floor(l + 300 * Math.pow(2, l / 7)); XP[l + 1] = Math.floor(s / 4); } }
 
-// id, name, icon, tool noun, xp multiplier, gp multiplier — ordered like the in-game skill tab
+// id, name, icon, tool noun, xp mult, gp mult, pet icon, pet name — ordered like the in-game skill tab
 const SKILLS = [
-  ['atk','Attack','⚔️','scimitar',1,1],        ['hp','Hitpoints','❤️','amulet',1,1],          ['min','Mining','⛏️','pickaxe',.9,1.2],
-  ['str','Strength','💪','warhammer',1,1],      ['agi','Agility','🏃','boots',1.1,.8],         ['smi','Smithing','🔨','hammer',1.1,.9],
-  ['def','Defence','🛡️','kiteshield',1,1],     ['herb','Herblore','🌿','pestle',1.3,.6],      ['fish','Fishing','🎣','harpoon',.95,1.15],
-  ['rng','Ranged','🏹','crossbow',1.1,.9],      ['thv','Thieving','🎭','lockpick',.85,1.5],    ['cook','Cooking','🍳','skillet',1.3,.6],
-  ['pray','Prayer','✨','censer',1.4,.5],       ['craft','Crafting','💎','chisel',1.1,.9],     ['fm','Firemaking','🔥','tinderbox',1.5,.4],
-  ['mag','Magic','🔮','staff',1.2,.8],          ['fletch','Fletching','🪶','knife',1.2,.8],    ['wc','Woodcutting','🪓','axe',1,1],
-  ['rc','Runecraft','🌀','talisman',.8,1.5],    ['slay','Slayer','💀','helm',.9,1.4],          ['farm','Farming','🌱','spade',1.2,.9],
-  ['con','Construction','🪚','saw',1.4,.5],     ['hunt','Hunter','🐾','snare',.9,1.3],         ['sail','Sailing','⛵','keel',1,1.1],
-].map(a => ({ id:a[0], name:a[1], icon:a[2], tool:a[3], xm:a[4], gm:a[5] }));
+  ['atk','Attack','⚔️','scimitar',1,1,'🐗','Tusk'],          ['hp','Hitpoints','❤️','amulet',1,1,'🐢','Shelly'],          ['min','Mining','⛏️','pickaxe',.9,1.2,'🦔','Rocky'],
+  ['str','Strength','💪','warhammer',1,1,'🦍','Brute'],       ['agi','Agility','🏃','boots',1.1,.8,'🐿️','Dash'],          ['smi','Smithing','🔨','hammer',1.1,.9,'🦎','Cinder'],
+  ['def','Defence','🛡️','kiteshield',1,1,'🦀','Clank'],      ['herb','Herblore','🌿','pestle',1.3,.6,'🐸','Tonic'],       ['fish','Fishing','🎣','harpoon',.95,1.15,'🦦','Splash'],
+  ['rng','Ranged','🏹','crossbow',1.1,.9,'🦅','Talon'],       ['thv','Thieving','🎭','lockpick',.85,1.5,'🦝','Bandit'],    ['cook','Cooking','🍳','skillet',1.3,.6,'🐓','Nugget'],
+  ['pray','Prayer','✨','censer',1.4,.5,'🕊️','Halo'],        ['craft','Crafting','💎','chisel',1.1,.9,'🕷️','Stitch'],    ['fm','Firemaking','🔥','tinderbox',1.5,.4,'🦊','Blaze'],
+  ['mag','Magic','🔮','staff',1.2,.8,'🦉','Hex'],             ['fletch','Fletching','🪶','knife',1.2,.8,'🦆','Quill'],     ['wc','Woodcutting','🪓','axe',1,1,'🦫','Chip'],
+  ['rc','Runecraft','🌀','talisman',.8,1.5,'🐈','Rift'],      ['slay','Slayer','💀','helm',.9,1.4,'🦇','Fang'],            ['farm','Farming','🌱','spade',1.2,.9,'🐇','Sprout'],
+  ['con','Construction','🪚','saw',1.4,.5,'🐜','Mason'],      ['hunt','Hunter','🐾','snare',.9,1.3,'🐺','Tracker'],        ['sail','Sailing','⛵','keel',1,1.1,'🦜','Skipper'],
+].map(a => ({ id:a[0], name:a[1], icon:a[2], tool:a[3], xm:a[4], gm:a[5], pi:a[6], pn:a[7] }));
 const BYID = Object.fromEntries(SKILLS.map(s => [s.id, s]));
+const COMBAT = ['atk','str','def','rng','mag','pray','hp'];
+
+// skill links: producer -> [resource, consumers]. A consumer uses 1 unit per action for bonus XP and gp.
+const PROD = { min:['ore',['smi']], fish:['raw fish',['cook']], wc:['logs',['fm','fletch','con']], farm:['herbs',['herb']],
+  hunt:['hides',['craft']], rc:['runes',['mag']], slay:['bones',['pray']], fletch:['arrows',['rng']] };
+const CONS = {}; for (const p in PROD) for (const c of PROD[p][1]) CONS[c] = p;
+const listNames = ids => { const n = ids.map(i => BYID[i].name); return n.length > 1 ? n.slice(0, -1).join(', ') + ' and ' + n[n.length - 1] : n[0]; };
 
 const XP_BASE = 3, XP_LVL = 1.02, GP_LVL = 1.035, TOOL_XP = 1.2, TOOL_GP = 1.5;
 const TIERS = ['Bronze','Iron','Steel','Black','Mithril','Adamant','Rune','Dragon','Crystal','Masterwork'];
@@ -208,6 +360,7 @@ const WORKERS = [
   { n:'Clan Helper',       r:1,  c:40e3 },
   { n:'Bot Farm',          r:4,  c:2e6 },
   { n:'Maxed Main Legion', r:15, c:150e6 },
+  { n:'Guild Contract',    r:40, c:5e9, quest:'ship' },
 ];
 const W_GROW = 1.35;
 const CP = [ // click power: actions per click
@@ -219,61 +372,158 @@ const SYN = [ // each click also performs v% of the skill's automated actions/s
   { n:'No foreman', v:0, c:0 }, { n:"Foreman's Whistle", v:1, c:20e3 }, { n:"Foreman's Horn", v:2, c:400e3 },
   { n:'Clan Broadcast', v:4, c:8e6 }, { n:'World Hop Rally', v:7, c:150e6 }, { n:'Server-Wide Event', v:10, c:3e9 },
 ];
+const EV = [ // random events arrive 15% sooner per tier
+  { n:'No charm', c:0 }, { n:'Lucky Rabbit Foot', c:50e3 }, { n:'Four-Leaf Clover', c:2e6 }, { n:'Ring of Fortune', c:80e6 }, { n:"Stranger's Favour", c:3e9 },
+];
+const BOSSES = [ // hp is set so each boss needs a certain combined combat level to kill inside 60s
+  ['🐀','Giant Rat King',30,50,'Gnawed crown'], ['👺','Goblin Warlord',70,300,'Warlord banner'], ['🧌','Moss Troll',120,1500,'Mossy club'],
+  ['👻','Barrow Wight',180,6e3,'Wight shroud'], ['🐍','Bog Hydra',250,20e3,'Hydra fang'], ['🐲','Frost Wyrm',320,60e3,'Frozen scale'],
+  ['🗿','Obsidian Golem',400,200e3,'Obsidian heart'], ['🕸️','Abyssal Matron',480,600e3,'Abyssal silk'], ['🦑','Storm Kraken',560,2e6,'Kraken ink'],
+  ['☠️','Shadow Lich',640,6e6,'Lich phylactery'], ['🐉','Elder Drake',700,15e6,'Drake ember'], ['👁️','The Nameless One',800,50e6,'Nameless sigil'],
+].map(a => ({ icon:a[0], n:a[1], need:a[2], hp:Math.round(1.2 * a[2] * a[2]), gp:a[3], drop:a[4] }));
+const QUESTS = [
+  { id:'lunch', n:'A Proper Lunch', req:{ fish:15, cook:15 }, gp:2e3, r:'Fishing and Cooking give 15% more XP.' },
+  { id:'smith', n:'The Apprentice Smith', req:{ min:20, smi:20 }, gp:10e3, r:'Mining and Smithing automation works 20% faster.' },
+  { id:'lodge', n:'Lumber for the Lodge', req:{ wc:30, fm:25, con:20 }, gp:50e3, r:'Woodcutting banks 2 logs per action.' },
+  { id:'herbal', n:"The Herbalist's Errand", req:{ farm:30, herb:30 }, gp:100e3, r:'The supplied bonus on every skill link rises from 50% to 75%.' },
+  { id:'roof', n:'Rooftop Shortcut', req:{ agi:40, thv:40 }, gp:300e3, r:'Random events arrive 25% sooner.' },
+  { id:'essence', n:'The Essence Trade', req:{ rc:40, mag:45 }, gp:500e3, r:'Each click performs 2 extra actions.' },
+  { id:'contract', n:"The Slayer's Contract", req:{ slay:50, atk:50, str:50, def:50 }, gp:2e6, r:'You deal 50% more damage to bosses.' },
+  { id:'ship', n:"The Shipwright's Dream", req:{ sail:50, con:50, craft:50 }, gp:5e6, r:'Unlocks the Guild Contract worker (40 actions per second) for every skill.' },
+  { id:'jack', n:'Jack of All Trades', all:60, gp:20e6, r:'All XP and gp +10%.' },
+  { id:'master', n:'Master of All', all:99, gp:1e9, r:'All XP and gp +25%.' },
+];
 
 /* ---------- state ---------- */
-const fresh = () => ({ v:1, gp:0, sel:'wc', cp:0, syn:0, buy:'1', t:Date.now(), buff:0,
-  s:Object.fromEntries(SKILLS.map(k => [k.id, { xp:0, tool:0, w:WORKERS.map(() => 0) }])) });
+const fresh = () => ({ v:2, gp:0, sel:'wc', cp:0, syn:0, ev:0, buy:'1', t:Date.now(), buff:0, frenzy:0, renown:0, mute:false, lbKey:'', lbName:'', peakLevel:24,
+  s:Object.fromEntries(SKILLS.map(k => [k.id, { xp:0, tool:0, w:WORKERS.map(() => 0) }])),
+  res:Object.fromEntries(Object.keys(PROD).map(p => [p, 0])),
+  q:{}, ach:{}, pets:{}, boss:{ i:0, max:0, prog:0, drops:{} },
+  st:{ clicks:0, played:0, run:0, earned:0, events:0, kills:0, prestiges:0, best99:0, xpAll:0 } });
 let S = fresh();
 const LV = {};            // cached level per skill
-let G = 1, totalLevel = 24;
+let G = 1, totalLevel = 24, view = 'train', quiet = false;
 let nextEvent = 150, eventLeft = 0;
 
 const levelOf = xp => { let l = 1; while (l < MAXL && XP[l + 1] <= xp) l++; return l; };
+const count = o => Object.keys(o).length;
+const capes = () => SKILLS.filter(k => LV[k.id] >= 99).length;
+const minLevel = () => Math.min(...SKILLS.map(k => LV[k.id]));
+const supBonus = () => S.q.herbal ? .75 : .5;
+const gain = g => { S.gp += g; S.st.earned += g; };
 function recalcGlobal() {
-  totalLevel = 0; let capes = 0;
-  for (const k of SKILLS) { totalLevel += LV[k.id]; if (LV[k.id] >= 99) capes++; }
-  G = (1 + .002 * (totalLevel - SKILLS.length)) * (1 + .05 * capes);
+  totalLevel = 0; for (const k of SKILLS) totalLevel += LV[k.id];
+  if (totalLevel > S.peakLevel) S.peakLevel = totalLevel;
+  G = (1 + .002 * (totalLevel - SKILLS.length)) * (1 + .05 * capes()) * (1 + .01 * count(S.ach)) * (1 + .03 * count(S.boss.drops))
+    * (1 + .05 * S.renown) * (S.q.jack ? 1.1 : 1) * (S.q.master ? 1.25 : 1);
 }
 function calc(id) {
   const k = BYID[id], st = S.s[id], l = LV[id];
   let auto = 0; for (let i = 0; i < WORKERS.length; i++) auto += st.w[i] * WORKERS[i].r;
+  if (S.q.smith && (id === 'min' || id === 'smi')) auto *= 1.2;
+  const own = S.pets[id] ? 1.1 : 1;
   return {
-    xp: XP_BASE * k.xm * Math.pow(XP_LVL, l - 1) * Math.pow(TOOL_XP, st.tool) * G * (S.buff > 0 ? 2 : 1),
-    gp: k.gm * Math.pow(GP_LVL, l - 1) * Math.pow(TOOL_GP, st.tool) * G,
+    xp: XP_BASE * k.xm * Math.pow(XP_LVL, l - 1) * Math.pow(TOOL_XP, st.tool) * G * own * (S.buff > 0 ? 2 : 1) * (S.q.lunch && (id === 'fish' || id === 'cook') ? 1.15 : 1),
+    gp: k.gm * Math.pow(GP_LVL, l - 1) * Math.pow(TOOL_GP, st.tool) * G * own,
     auto,
   };
 }
+const clickActs = c => (CP[S.cp].v + (S.q.essence ? 2 : 0) + SYN[S.syn].v / 100 * c.auto) * (S.frenzy > 0 ? 7 : 1);
+function act(id, acts, c) { // perform `acts` actions of a skill
+  let m = 1; const p = CONS[id];
+  if (p) { const used = Math.min(S.res[p], acts); S.res[p] -= used; m = 1 + supBonus() * used / acts; }
+  if (PROD[id]) S.res[id] += acts * (id === 'wc' && S.q.lodge ? 2 : 1);
+  gain(c.gp * acts * m); addXp(id, c.xp * acts * m);
+  if (!S.pets[id] && Math.random() < 1 - Math.exp(-acts * LV[id] / 1e7)) {
+    S.pets[id] = 1; dirtySkills = true;
+    toast(`${BYID[id].pi} You have a funny feeling like you're being followed. ${BYID[id].pn} the ${BYID[id].name} pet joins you: +10% XP and gp in ${BYID[id].name}.`, 9000); sfx('pet');
+  }
+}
 function addXp(id, amt) {
-  const st = S.s[id]; st.xp = Math.min(XPCAP, st.xp + amt);
-  let up = false;
-  while (LV[id] < MAXL && st.xp >= XP[LV[id] + 1]) { LV[id]++; up = true; }
-  if (up) onLevel(id);
+  const st = S.s[id], old = LV[id], x0 = st.xp; st.xp = Math.min(XPCAP, st.xp + amt); S.st.xpAll += st.xp - x0;
+  while (LV[id] < MAXL && st.xp >= XP[LV[id] + 1]) LV[id]++;
+  if (LV[id] > old) onLevel(id, old, LV[id]);
 }
-function onLevel(id) {
-  const before = LV[id]; recalcGlobal(); dirtySkills = true;
+function onLevel(id, old, now) {
+  recalcGlobal(); dirtySkills = true;
+  const k = BYID[id], cape = old < 99 && now >= 99;
+  if (cape && (!S.st.best99 || S.st.run < S.st.best99)) S.st.best99 = Math.max(1, S.st.run);
   if (quiet) return;
-  const k = BYID[id];
-  if (before === 99) toast(`${k.icon} ${k.name} is level 99. Skill cape earned: +5% to all XP and gp.`);
-  else if (before % 10 === 0 || before < 10 || id === S.sel) toast(`${k.icon} ${k.name} level ${before}`);
+  if (cape) { toast(`${k.icon} ${k.name} is level 99. Skill cape earned: +5% to all XP and gp.`, 8000); sfx('cape'); fireworks(); }
+  else if (now % 10 === 0 || now < 10 || id === S.sel) {
+    toast(`${k.icon} ${k.name} level ${now}`); sfx('level');
+    if (id === S.sel) { clicker.classList.remove('ding'); void clicker.offsetWidth; clicker.classList.add('ding'); }
+  }
 }
-let quiet = false;
+const bossDps = () => { let s = 0; for (const id of COMBAT) s += LV[id]; return s * s / 50 * (S.q.contract ? 1.5 : 1); };
+function bossKills(k) {
+  const i = S.boss.i, b = BOSSES[i];
+  gain(k * b.gp * G); S.st.kills += k;
+  if (i === BOSSES.length - 1) S.bossLast = 1;
+  if (!S.boss.drops[i] && Math.random() < 1 - Math.pow(7 / 8, k)) { S.boss.drops[i] = 1; recalcGlobal(); toast(`${b.icon} ${b.n} dropped the ${b.drop}: +3% to all XP and gp.`, 8000); sfx('pet'); }
+  if (i === S.boss.max && i < BOSSES.length - 1) { S.boss.max++; if (bossDps() * 60 >= BOSSES[i + 1].hp) { S.boss.i++; S.boss.prog = 0; } if (!quiet) toast(`${b.icon} ${b.n} defeated. ${BOSSES[i + 1].n} is now on the ladder.`, 6000); }
+}
 function advance(dt) { // run automation for dt seconds
   let rem = dt;
   while (rem > 0) {
     const step = Math.min(rem, 30); rem -= step;
-    for (const k of SKILLS) {
-      const c = calc(k.id); if (!c.auto) continue;
-      const acts = c.auto * step; S.gp += c.gp * acts; addXp(k.id, c.xp * acts);
-    }
+    for (const k of SKILLS) { const c = calc(k.id); if (c.auto) act(k.id, c.auto * step, c); }
+    const b = BOSSES[S.boss.i], dps = bossDps();
+    if (dps * 60 >= b.hp) { S.boss.prog += dps * step; const n = Math.floor(S.boss.prog / b.hp); if (n > 0) { S.boss.prog -= n * b.hp; bossKills(n); } }
+    else S.boss.prog = 0;
     if (S.buff > 0) S.buff = Math.max(0, S.buff - step);
+    if (S.frenzy > 0) S.frenzy = Math.max(0, S.frenzy - step);
+    S.st.run += step;
   }
 }
+const workerOn = i => !WORKERS[i].quest || S.q[WORKERS[i].quest];
 const workerCost = (i, owned, n) => { let c = 0; for (let j = 0; j < n; j++) c += WORKERS[i].c * Math.pow(W_GROW, owned + j); return Math.ceil(c); };
 function buyCount(i, owned) {
   if (S.buy !== 'max') return +S.buy;
   let n = 0, gp = S.gp;
   while (n < 500) { const c = Math.ceil(WORKERS[i].c * Math.pow(W_GROW, owned + n)); if (gp < c) break; gp -= c; n++; }
   return Math.max(1, n);
+}
+const questReady = q => q.all ? minLevel() >= q.all : Object.keys(q.req).every(id => LV[id] >= q.req[id]);
+const runXp = () => SKILLS.reduce((a, k) => a + S.s[k.id].xp, 0);
+const renownGain = () => Math.floor(Math.sqrt(runXp() / 200e3));
+
+/* ---------- achievements ---------- */
+const workersTotal = () => SKILLS.reduce((a, k) => a + S.s[k.id].w.reduce((x, y) => x + y, 0), 0);
+const maxTool = () => Math.max(...SKILLS.map(k => S.s[k.id].tool));
+const maxLv = () => Math.max(...SKILLS.map(k => LV[k.id]));
+const ACH = [
+  ...[100, 250, 500, 1000, 1500, 2000, 2376].map(n => [`tl${n}`, `Total level ${n.toLocaleString()}`, n === 2376 ? 'Reach level 99 in every skill' : `Reach total level ${n.toLocaleString()}`, () => totalLevel >= n]),
+  ['l50', 'Halfway there', 'Reach level 50 in any skill', () => maxLv() >= 50],
+  ['c1', 'First cape', 'Reach level 99 in any skill', () => capes() >= 1],
+  ['c5', 'Cape rack', 'Reach level 99 in 5 skills', () => capes() >= 5],
+  ['c12', 'Half maxed', 'Reach level 99 in 12 skills', () => capes() >= 12],
+  ['l126', 'No life', 'Reach virtual level 126 in any skill', () => maxLv() >= 126],
+  ...[30, 50, 70, 90].map(n => [`b${n}`, `Base ${n}`, `Reach level ${n} in every skill`, () => minLevel() >= n]),
+  ...[[100, 'Warm fingers'], [1e3, 'Sore fingers'], [1e4, 'Iron fingers'], [1e5, 'Autoclicker suspect']].map(([n, t]) => [`k${n}`, t, `Click ${n.toLocaleString()} times`, () => S.st.clicks >= n]),
+  ...[[1e4, 'Pocket money'], [1e6, 'Millionaire'], [1e8, 'Merchant'], [1e10, 'Tycoon']].map(([n, t]) => [`g${n}`, t, `Earn ${fmt(n)} gp in total`, () => S.st.earned >= n]),
+  ...[[10, 'Small crew'], [100, 'Workforce'], [500, 'Empire']].map(([n, t]) => [`w${n}`, t, `Own ${n} workers across all skills`, () => workersTotal() >= n]),
+  ['t6', 'Rune tools', 'Buy a Rune tool', () => maxTool() >= 6],
+  ['t9', 'Masterwork', 'Buy a Masterwork tool', () => maxTool() >= 9],
+  ['s1', 'Stockpiler', 'Hold 10,000 of any resource', () => Object.values(S.res).some(v => v >= 1e4)],
+  ['bk1', 'Rat catcher', 'Defeat your first boss', () => S.st.kills >= 1],
+  ['bk100', 'Boss farmer', 'Defeat 100 bosses', () => S.st.kills >= 100],
+  ['bl', 'Top of the ladder', 'Defeat The Nameless One', () => !!S.bossLast],
+  ['bd', 'Collection log', 'Own every boss drop', () => count(S.boss.drops) >= BOSSES.length],
+  ['p1', 'Followed', 'Find a pet', () => count(S.pets) >= 1],
+  ['p5', 'Menagerie', 'Find 5 pets', () => count(S.pets) >= 5],
+  ['p24', 'Zookeeper', 'Find every pet', () => count(S.pets) >= SKILLS.length],
+  ['q1', 'Adventurer', 'Complete a quest', () => count(S.q) >= 1],
+  ['qa', 'Quest cape', 'Complete every quest', () => count(S.q) >= QUESTS.length],
+  ['e1', 'Stranger danger', 'Claim a random event', () => S.st.events >= 1],
+  ['e25', 'Event hunter', 'Claim 25 random events', () => S.st.events >= 25],
+  ['r1', 'Fresh start', 'Prestige once', () => S.st.prestiges >= 1],
+  ['r5', 'Serial restarter', 'Prestige 5 times', () => S.st.prestiges >= 5],
+].map(a => ({ id:a[0], n:a[1], d:a[2], ok:a[3] }));
+function checkAch() {
+  let got = false;
+  for (const a of ACH) if (!S.ach[a.id] && a.ok()) { S.ach[a.id] = 1; got = true; toast(`Achievement: ${a.n}. +1% to all XP and gp.`, 6000); }
+  if (got) { recalcGlobal(); sfx('pet'); }
 }
 
 /* ---------- formatting ---------- */
@@ -283,16 +533,61 @@ function fmt(n) {
   for (const [v, s] of u) if (n >= v) { const x = n / v; return (x >= 100 ? x.toFixed(0) : x >= 10 ? x.toFixed(1) : x.toFixed(2)) + s; }
 }
 const fmtR = n => n < 100 ? (Math.round(n * 10) / 10).toString() : fmt(n);
+const fmtT = s => s >= 3600 ? Math.floor(s / 3600) + 'h ' + Math.floor(s % 3600 / 60) + 'm' : s >= 60 ? Math.floor(s / 60) + 'm ' + Math.floor(s % 60) + 's' : Math.floor(s) + 's';
 const $ = id => document.getElementById(id);
+const setHTML = (el, html) => { if (el._h !== html) { el.innerHTML = html; el._h = html; } };
+
+/* ---------- sound and effects ---------- */
+let AC = null;
+function audio() {
+  if (S.mute) return null;
+  try { if (!AC) AC = new (window.AudioContext || window.webkitAudioContext)(); if (AC.state === 'suspended') AC.resume(); return AC; } catch (e) { return null; }
+}
+function tone(f, at, dur, type, vol) {
+  const a = AC, o = a.createOscillator(), g = a.createGain(), t = a.currentTime + at;
+  o.type = type; o.frequency.value = f; g.gain.setValueAtTime(vol, t); g.gain.exponentialRampToValueAtTime(.0001, t + dur);
+  o.connect(g); g.connect(a.destination); o.start(t); o.stop(t + dur);
+}
+function sfx(kind) {
+  if (quiet || !audio()) return;
+  try {
+    if (kind === 'click') tone(660 + Math.random() * 120, 0, .05, 'triangle', .03);
+    else if (kind === 'buy') { tone(520, 0, .07, 'square', .03); tone(780, .06, .09, 'square', .03); }
+    else if (kind === 'level') [523, 659, 784, 1047].forEach((f, i) => tone(f, i * .09, .16, 'square', .045));
+    else if (kind === 'pet') [784, 988, 1175, 1568].forEach((f, i) => tone(f, i * .07, .2, 'triangle', .06));
+    else if (kind === 'cape') [392, 523, 659, 784, 659, 784, 1047, 1319].forEach((f, i) => tone(f, i * .13, .3, 'square', .05));
+  } catch (e) {}
+}
+let reduced = false; try { reduced = window.matchMedia('(prefers-reduced-motion:reduce)').matches; } catch (e) {}
+function fireworks() {
+  if (reduced) return;
+  const cv = $('fx'), ctx = cv.getContext('2d'); cv.width = innerWidth; cv.height = innerHeight; cv.hidden = false;
+  const ps = [];
+  for (let b = 0; b < 6; b++) {
+    const x = cv.width * (.15 + Math.random() * .7), y = cv.height * (.15 + Math.random() * .4), hue = Math.random() * 360, delay = b * .25;
+    for (let i = 0; i < 46; i++) { const a = Math.random() * 6.283, v = 60 + Math.random() * 220; ps.push({ x, y, vx:Math.cos(a) * v, vy:Math.sin(a) * v, hue, delay }); }
+  }
+  const t0 = performance.now(); let prev = t0;
+  (function frame(now) {
+    const t = (now - t0) / 1000, dt = Math.min(.05, (now - prev) / 1000); prev = now;
+    ctx.clearRect(0, 0, cv.width, cv.height);
+    for (const p of ps) {
+      if (t < p.delay) continue; const age = t - p.delay; if (age > 1.6) continue;
+      p.x += p.vx * dt; p.y += p.vy * dt; p.vy += 160 * dt; p.vx *= .985;
+      ctx.fillStyle = `hsla(${p.hue},90%,65%,${1 - age / 1.6})`; ctx.fillRect(p.x, p.y, 4, 4);
+    }
+    if (t < 3.2) requestAnimationFrame(frame); else cv.hidden = true;
+  })(t0);
+}
 
 /* ---------- build UI ---------- */
 const skillEls = {};
 for (const k of SKILLS) {
   const b = document.createElement('button');
-  b.className = 'sk'; b.innerHTML = `<span class="gear" hidden>⚙</span><span class="ico">${k.icon}</span><span class="nm">${k.name}</span><span class="lv num">1</span><span class="bar"><i></i></span>`;
+  b.className = 'sk'; b.innerHTML = `<span class="pet" hidden>${k.pi}</span><span class="gear" hidden>⚙</span><span class="ico">${k.icon}</span><span class="nm">${k.name}</span><span class="lv num">1</span><span class="bar"><i></i></span>`;
   b.onclick = () => { S.sel = k.id; renderSel(); };
   $('skills').appendChild(b);
-  skillEls[k.id] = { b, lv:b.querySelector('.lv'), bar:b.querySelector('i'), gear:b.querySelector('.gear') };
+  skillEls[k.id] = { b, lv:b.querySelector('.lv'), bar:b.querySelector('i'), gear:b.querySelector('.gear'), pet:b.querySelector('.pet') };
 }
 const workerEls = WORKERS.map((w, i) => {
   const d = document.createElement('div'); d.className = 'item';
@@ -301,25 +596,33 @@ const workerEls = WORKERS.map((w, i) => {
   const btn = d.querySelector('button');
   btn.onclick = () => {
     const st = S.s[S.sel], n = buyCount(i, st.w[i]), c = workerCost(i, st.w[i], n);
-    if (S.gp >= c) { S.gp -= c; st.w[i] += n; dirtySkills = true; render(); }
+    if (S.gp >= c) { S.gp -= c; st.w[i] += n; dirtySkills = true; sfx('buy'); render(); }
   };
-  return { cnt:d.querySelector('em'), btn };
+  return { row:d, cnt:d.querySelector('em'), btn };
 });
 document.querySelectorAll('.seg button').forEach(b => b.onclick = () => { S.buy = b.dataset.amt; render(); });
 $('toolBuy').onclick = () => {
   const st = S.s[S.sel], t = st.tool + 1;
-  if (t < TIERS.length && LV[S.sel] >= TOOL_REQ[t] && S.gp >= TOOL_COST[t]) { S.gp -= TOOL_COST[t]; st.tool = t; render(); }
+  if (t < TIERS.length && LV[S.sel] >= TOOL_REQ[t] && S.gp >= TOOL_COST[t]) { S.gp -= TOOL_COST[t]; st.tool = t; sfx('buy'); render(); }
 };
-$('cpBuy').onclick = () => { const n = CP[S.cp + 1]; if (n && S.gp >= n.c) { S.gp -= n.c; S.cp++; render(); } };
-$('synBuy').onclick = () => { const n = SYN[S.syn + 1]; if (n && S.gp >= n.c) { S.gp -= n.c; S.syn++; render(); } };
+const tierBuy = (key, list) => () => { const n = list[S[key] + 1]; if (n && S.gp >= n.c) { S.gp -= n.c; S[key]++; sfx('buy'); render(); } };
+$('cpBuy').onclick = tierBuy('cp', CP); $('synBuy').onclick = tierBuy('syn', SYN); $('evBuy').onclick = tierBuy('ev', EV);
+document.querySelectorAll('nav button').forEach(b => b.onclick = () => {
+  view = b.dataset.view;
+  document.querySelectorAll('nav button').forEach(x => x.setAttribute('aria-pressed', x === b));
+  for (const v of ['train', 'boss', 'quests', 'ach', 'scores', 'lb', 'prestige']) $('v-' + v).hidden = v !== view;
+  render(); renderView(); if (view === 'lb') lbOpen();
+});
+$('mute').onclick = () => { S.mute = !S.mute; renderMute(); if (!S.mute) sfx('buy'); };
+function renderMute() { $('mute').textContent = 'Sound: ' + (S.mute ? 'off' : 'on'); $('mute').setAttribute('aria-pressed', S.mute); }
 
 /* ---------- clicking ---------- */
 const clicker = $('clicker');
 clicker.addEventListener('keydown', e => { if (e.repeat) e.preventDefault(); }); // no holding Enter
 clicker.addEventListener('click', e => {
-  const c = calc(S.sel), acts = CP[S.cp].v + SYN[S.syn].v / 100 * c.auto;
-  S.gp += c.gp * acts; addXp(S.sel, c.xp * acts);
-  floater(e, '+' + fmt(Math.max(1, c.xp * acts)) + ' xp');
+  const c = calc(S.sel), acts = clickActs(c), x0 = S.s[S.sel].xp;
+  act(S.sel, acts, c); S.st.clicks++;
+  floater(e, '+' + fmt(Math.max(1, S.s[S.sel].xp - x0)) + ' xp'); sfx('click');
   render();
 });
 let floats = 0;
@@ -339,18 +642,49 @@ function toast(msg, ms = 4000) {
 }
 
 /* ---------- random events ---------- */
+const eventGap = () => (120 + Math.random() * 180) * Math.pow(.85, S.ev) * (S.q.roof ? .75 : 1);
 $('event').onclick = () => {
-  eventLeft = 0; $('event').classList.remove('on');
-  if (Math.random() < .5) { S.buff = 60; toast('Random event: double XP in every skill for 60 seconds.'); }
-  else {
-    let gps = 0; for (const k of SKILLS) { const c = calc(k.id); gps += c.gp * c.auto; }
-    const c = calc(S.sel), prize = Math.max(gps * 90, c.gp * CP[S.cp].v * 60);
-    S.gp += prize; toast(`Random event: a mysterious stranger hands you ${fmt(prize)} gp.`);
+  eventLeft = 0; $('event').classList.remove('on'); S.st.events++; sfx('pet');
+  const roll = Math.floor(Math.random() * 5), k = BYID[S.sel], c = calc(S.sel);
+  if (roll === 0) { S.buff = 60; toast('Random event: double XP in every skill for 60 seconds.', 6000); }
+  else if (roll === 1) { S.frenzy = 20; toast('Random event: click frenzy. Clicks count 7 times for 20 seconds.', 6000); }
+  else if (roll === 2) {
+    for (const p in PROD) S.res[p] += Math.max(500, calc(p).auto * 120);
+    toast('Random event: a supply ship docks and tops up every stockpile.', 6000);
+  } else if (roll === 3) {
+    const l = LV[S.sel], xp = l < MAXL ? (XP[l + 1] - XP[l]) * .5 : 1e6;
+    addXp(S.sel, xp); toast(`Random event: a genie's lamp grants ${fmt(xp)} ${k.name} XP.`, 6000);
+  } else {
+    let gps = 0; for (const s of SKILLS) { const x = calc(s.id); gps += x.gp * x.auto; }
+    const prize = Math.max(gps * 90, c.gp * CP[S.cp].v * 60);
+    gain(prize); toast(`Random event: a mysterious stranger hands you ${fmt(prize)} gp.`, 6000);
   }
   render();
 };
 
-/* ---------- render ---------- */
+/* ---------- bosses, quests, prestige actions ---------- */
+$('bossPrev').onclick = () => { if (S.boss.i > 0) { S.boss.i--; S.boss.prog = 0; renderView(); } };
+$('bossNext').onclick = () => { if (S.boss.i < S.boss.max) { S.boss.i++; S.boss.prog = 0; renderView(); } };
+$('questList').addEventListener('click', e => {
+  const b = e.target.closest('button[data-q]'); if (!b) return;
+  const q = QUESTS.find(x => x.id === b.dataset.q);
+  if (q && !S.q[q.id] && questReady(q)) { S.q[q.id] = 1; gain(q.gp); recalcGlobal(); toast(`Quest complete: ${q.n}. ${q.r}`, 8000); sfx('level'); render(); renderView(); }
+});
+let presArm = 0;
+$('presBtn').onclick = () => {
+  const n = renownGain(); if (totalLevel < 1000 || n < 1) return;
+  if (Date.now() > presArm) { presArm = Date.now() + 4000; renderView(); setTimeout(renderView, 4100); return; }
+  const f = fresh();
+  S.renown += n; S.st.prestiges++; S.st.run = 0;
+  for (const key of ['gp', 'cp', 'syn', 'ev', 'buff', 'frenzy', 's', 'res']) S[key] = f[key];
+  S.boss.i = 0; S.boss.prog = 0; presArm = 0;
+  for (const k of SKILLS) LV[k.id] = 1;
+  recalcGlobal(); dirtySkills = true; save(); sfx('cape'); fireworks();
+  toast(`You start over with ${S.renown} Renown: +${S.renown * 5}% to all XP and gp.`, 9000);
+  renderSel(); renderView();
+};
+
+/* ---------- render: training view ---------- */
 let dirtySkills = true;
 function renderSel() {
   const k = BYID[S.sel];
@@ -360,15 +694,23 @@ function renderSel() {
   render();
 }
 function setBuy(btn, cost, ok, label) { btn.textContent = label || fmt(cost) + ' gp'; btn.disabled = !ok; }
+function tierItem(key, list, desc) {
+  const cur = list[S[key]], nx = list[S[key] + 1], el = $(key + 'Item');
+  el.querySelector('.t').textContent = nx ? nx.n : cur.n;
+  el.querySelector('.d').textContent = desc(cur, nx);
+  setBuy($(key + 'Buy'), nx ? nx.c : 0, nx && S.gp >= nx.c, nx ? null : 'Owned');
+}
 function render() {
-  const id = S.sel, k = BYID[id], st = S.s[id], l = LV[id], c = calc(id);
   // header
   let gps = 0; for (const s of SKILLS) { const x = calc(s.id); gps += x.gp * x.auto; }
   $('gp').textContent = fmt(S.gp); $('gps').textContent = fmtR(gps);
   $('total').textContent = totalLevel; $('bonus').textContent = '+' + Math.round((G - 1) * 100) + '%';
-  $('buffBox').hidden = S.buff <= 0; $('buff').textContent = Math.ceil(S.buff) + 's';
+  const boosts = []; if (S.buff > 0) boosts.push('2× XP ' + Math.ceil(S.buff) + 's'); if (S.frenzy > 0) boosts.push('7× clicks ' + Math.ceil(S.frenzy) + 's');
+  $('buffBox').hidden = !boosts.length; $('buff').textContent = boosts.join(' · ');
+  if (view !== 'train') return;
+  const id = S.sel, k = BYID[id], st = S.s[id], l = LV[id], c = calc(id);
   // stage
-  $('lvl').textContent = 'Level ' + l + (l > 99 ? ' (virtual)' : '');
+  $('lvl').textContent = 'Level ' + l + (l > 99 ? ' (virtual)' : '') + (S.pets[id] ? `  ${k.pi}` : '');
   if (l >= MAXL) {
     $('xpFill').style.width = (st.xp / XPCAP * 100) + '%';
     $('xpText').textContent = `${fmt(st.xp)} / 200M XP`;
@@ -377,9 +719,15 @@ function render() {
     $('xpFill').style.width = ((st.xp - a) / (b - a) * 100) + '%';
     $('xpText').textContent = `${Math.floor(st.xp).toLocaleString()} XP · ${Math.ceil(b - st.xp).toLocaleString()} to level ${l + 1}`;
   }
-  const acts = CP[S.cp].v + SYN[S.syn].v / 100 * c.auto;
-  $('yXp').textContent = fmtR(c.xp * acts); $('yGp').textContent = fmtR(c.gp * acts);
-  $('yAuto').textContent = fmtR(c.auto); $('yXps').textContent = fmtR(c.xp * c.auto);
+  const p = CONS[id], stocked = p && S.res[p] >= 1, m = stocked ? 1 + supBonus() : 1, acts = clickActs(c);
+  $('yXp').textContent = fmtR(c.xp * acts * m); $('yGp').textContent = fmtR(c.gp * acts * m);
+  $('yAuto').textContent = fmtR(c.auto); $('yXps').textContent = fmtR(c.xp * c.auto * m);
+  let sup = '';
+  if (p) { const [rn] = PROD[p], pct = Math.round(supBonus() * 100);
+    sup += stocked ? `Supplied: uses 1 of your <b>${fmt(S.res[p])} ${rn}</b> per action for +${pct}% XP and gp. `
+                   : `<span class="c-bad">Out of ${rn}.</span> Train ${BYID[p].name} to stock up and earn +${pct}% XP and gp here. `; }
+  if (PROD[id]) sup += `Each action banks ${id === 'wc' && S.q.lodge ? 2 : 1} ${PROD[id][0]} for ${listNames(PROD[id][1])}. In the bank: <b>${fmt(S.res[id])}</b>.`;
+  setHTML($('supply'), sup);
   // tool
   const ti = $('toolItem'), nt = st.tool + 1;
   if (nt >= TIERS.length) {
@@ -394,32 +742,129 @@ function render() {
   }
   // workers
   workerEls.forEach((w, i) => {
+    w.row.hidden = !workerOn(i); if (w.row.hidden) return;
     const n = buyCount(i, st.w[i]), cost = workerCost(i, st.w[i], n);
     w.cnt.textContent = st.w[i];
     setBuy(w.btn, cost, S.gp >= cost, (n > 1 ? `×${n} · ` : '') + fmt(cost) + ' gp');
   });
   document.querySelectorAll('.seg button').forEach(b => b.setAttribute('aria-pressed', b.dataset.amt === S.buy));
-  // click upgrades
-  const ncp = CP[S.cp + 1], ci = $('cpItem');
-  ci.querySelector('.t').textContent = ncp ? ncp.n : CP[S.cp].n;
-  ci.querySelector('.d').textContent = ncp ? `Each click performs ${ncp.v} actions (now ${CP[S.cp].v}).` : `Each click performs ${CP[S.cp].v} actions.`;
-  setBuy($('cpBuy'), ncp ? ncp.c : 0, ncp && S.gp >= ncp.c, ncp ? null : 'Owned');
-  const ns = SYN[S.syn + 1], si = $('synItem');
-  si.querySelector('.t').textContent = ns ? ns.n : SYN[S.syn].n;
-  si.querySelector('.d').textContent = ns ? `Each click also triggers ${ns.v}% of the skill's automated actions per second (now ${SYN[S.syn].v}%).` : `Each click also triggers ${SYN[S.syn].v}% of the skill's automated actions per second.`;
-  setBuy($('synBuy'), ns ? ns.c : 0, ns && S.gp >= ns.c, ns ? null : 'Owned');
+  // global upgrades
+  tierItem('cp', CP, (cur, nx) => nx ? `Each click performs ${nx.v} actions (now ${cur.v}).` : `Each click performs ${cur.v} actions.`);
+  tierItem('syn', SYN, (cur, nx) => nx ? `Each click also triggers ${nx.v}% of the skill's automated actions per second (now ${cur.v}%).` : `Each click also triggers ${cur.v}% of the skill's automated actions per second.`);
+  tierItem('ev', EV, (cur, nx) => nx ? `Random events arrive 15% sooner. Tier ${S.ev + 1} of ${EV.length - 1}.` : 'Random events arrive as often as they can.');
   // skill tab
   for (const s of SKILLS) {
     const e = skillEls[s.id], lv = LV[s.id], x = S.s[s.id].xp;
     e.bar.style.width = (lv >= MAXL ? 100 : (x - XP[lv]) / (XP[lv + 1] - XP[lv]) * 100) + '%';
     if (dirtySkills) {
       e.lv.textContent = lv; e.b.classList.toggle('cape', lv >= 99);
-      e.gear.hidden = !S.s[s.id].w.some(n => n > 0);
+      e.gear.hidden = !S.s[s.id].w.some(n => n > 0); e.pet.hidden = !S.pets[s.id];
       e.b.title = `${s.name}: level ${lv}`;
     }
   }
   dirtySkills = false;
 }
+
+/* ---------- render: other views (twice a second) ---------- */
+const tile = (v, label, cls = '') => `<div class="tile"><b class="num ${cls}">${v}</b><span>${label}</span></div>`;
+function renderView() {
+  const ready = QUESTS.filter(q => !S.q[q.id] && questReady(q)).length;
+  $('qBadge').textContent = ready ? ready : '';
+  $('pBadge').textContent = totalLevel >= 1000 && renownGain() >= 1 ? '+' + renownGain() : '';
+  if (view === 'boss') {
+    const i = S.boss.i, b = BOSSES[i], dps = bossDps(), can = dps * 60 >= b.hp;
+    $('bossFace').textContent = b.icon; $('bossName').textContent = b.n;
+    $('bossFill').style.width = (can ? 100 - S.boss.prog / b.hp * 100 : 100) + '%';
+    $('bossText').textContent = can ? `${fmt(Math.max(0, b.hp - S.boss.prog))} / ${fmt(b.hp)} HP` : `Too strong. It needs ${fmt(b.hp / 60)} damage per second and you deal ${fmtR(dps)}.`;
+    $('bossPrev').disabled = i === 0; $('bossNext').disabled = i >= S.boss.max;
+    setHTML($('bossTiles'), tile(fmtR(dps), 'damage per second') + tile(can ? fmtT(b.hp / dps) : 'Never', 'time per kill', can ? '' : 'c-bad')
+      + tile(fmt(b.gp * G), 'gp per kill', 'c-gp') + tile(S.boss.drops[i] ? 'Owned' : '1 in 8', b.drop, S.boss.drops[i] ? 'c-xp' : '')
+      + tile(COMBAT.reduce((a, id) => a + LV[id], 0), 'combined combat levels') + tile(fmt(S.st.kills), 'bosses defeated'));
+    setHTML($('ladder'), BOSSES.map((x, j) => `<div class="item ${j === i ? 'cur' : ''} ${j > S.boss.max ? 'lock' : ''}"><span style="font-size:22px">${x.icon}</span><div class="t">${x.n}</div>`
+      + `<span class="num ${S.boss.drops[j] ? 'c-xp' : ''}" style="font-size:12.5px">${S.boss.drops[j] ? x.drop : j > S.boss.max ? 'Locked' : 'No drop yet'}</span>`
+      + `<div class="d">${fmt(x.hp)} HP · ${fmt(x.gp)} gp · around ${x.need} combined combat levels</div></div>`).join(''));
+  } else if (view === 'quests') {
+    setHTML($('questList'), QUESTS.map(q => {
+      const done = S.q[q.id], ok = questReady(q);
+      const req = q.all ? `<span class="${ok ? 'met' : 'unmet'}">Level ${q.all} in every skill (lowest is ${minLevel()})</span>`
+        : Object.keys(q.req).map(id => `<span class="${LV[id] >= q.req[id] ? 'met' : 'unmet'}">${BYID[id].name} ${q.req[id]}</span>`).join(', ');
+      return `<div class="item ${done ? 'done' : ''}"><div class="t">${q.n}</div><div class="d">Needs ${req}.<br>Reward: ${fmt(q.gp)} gp. ${q.r}</div>`
+        + `<button class="buy" data-q="${q.id}" ${done || !ok ? 'disabled' : ''}>${done ? 'Done' : 'Complete'}</button></div>`;
+    }).join(''));
+  } else if (view === 'ach') {
+    $('achCount').textContent = `${count(S.ach)} of ${ACH.length}`; $('petCount').textContent = `${count(S.pets)} of ${SKILLS.length}`;
+    setHTML($('achGrid'), ACH.map(a => `<div class="ach ${S.ach[a.id] ? 'on' : ''}"><b>${a.n}</b>${a.d}</div>`).join(''));
+    setHTML($('petGrid'), SKILLS.map(k => `<div class="petc ${S.pets[k.id] ? 'on' : ''}"><span>${k.pi}</span>${S.pets[k.id] ? k.pn : '???'}<br>${k.name}</div>`).join(''));
+  } else if (view === 'scores') {
+    setHTML($('scoreBody'), SKILLS.map(k => {
+      const c = calc(k.id), st = S.s[k.id];
+      return `<tr><td>${k.icon} ${k.name}</td><td class="lv">${LV[k.id]}</td><td>${Math.floor(st.xp).toLocaleString()}</td><td>${fmt(c.xp * c.auto * 3600)}</td><td>${fmt(c.gp * c.auto * 3600)}</td>`
+        + `<td>${TIERS[st.tool]}</td><td>${st.w.reduce((a, b) => a + b, 0)}</td><td>${S.pets[k.id] ? k.pi : ''}</td></tr>`;
+    }).join('') + `<tr><td><b>Overall</b></td><td class="lv">${totalLevel}</td><td>${Math.floor(runXp()).toLocaleString()}</td><td></td><td></td><td></td><td>${workersTotal()}</td><td>${count(S.pets)}</td></tr>`);
+    setHTML($('statTiles'), tile(fmtT(S.st.played), 'time played') + tile(S.st.clicks.toLocaleString(), 'clicks') + tile(fmt(S.st.earned), 'gp earned in total', 'c-gp')
+      + tile(S.st.best99 ? fmtT(S.st.best99) : 'Not yet', 'fastest level 99') + tile(capes(), 'skills at 99') + tile(fmt(S.st.kills), 'bosses defeated')
+      + tile(S.st.events, 'random events claimed') + tile(S.st.prestiges, 'times prestiged') + tile(S.renown, 'Renown'));
+  } else if (view === 'prestige') {
+    const n = renownGain(), ok = totalLevel >= 1000 && n >= 1;
+    setHTML($('presTiles'), tile(S.renown, 'Renown now') + tile('+' + S.renown * 5 + '%', 'bonus from Renown', 'c-xp') + tile('+' + n, 'Renown if you prestige now', 'c-gp')
+      + tile(totalLevel + ' / 1,000', 'total level needed', totalLevel >= 1000 ? 'c-xp' : 'c-bad'));
+    $('presBtn').disabled = !ok;
+    $('presBtn').textContent = !ok ? 'Reach total level 1,000 first' : Date.now() < presArm ? 'Click again to start over' : `Prestige for +${n} Renown`;
+  }
+}
+
+/* ---------- leaderboard (Supabase) ---------- */
+const LB_ON = !!(SUPABASE_URL && SUPABASE_KEY);
+let lbSort = 'total_level', lbBusy = false, lbTimer = 0;
+const esc = s => String(s).replace(/[&<>"']/g, c => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[c]));
+const bossesBeaten = () => S.bossLast ? BOSSES.length : S.boss.max;
+async function rpc(fn, body) {
+  const r = await fetch(`${SUPABASE_URL.replace(/\/$/, '')}/rest/v1/rpc/${fn}`, { method:'POST', headers:{ apikey:SUPABASE_KEY, 'Content-Type':'application/json' }, body:JSON.stringify(body) });
+  const text = await r.text(); let data = null; try { data = text ? JSON.parse(text) : null; } catch (e) {}
+  if (!r.ok) throw new Error((data && data.message) || 'HTTP ' + r.status);
+  return data;
+}
+const lbMsg = (m, bad) => { $('lbMsg').textContent = m; $('lbMsg').className = 'hint' + (bad ? ' c-bad' : ''); };
+function newKey() { try { return crypto.randomUUID(); } catch (e) { return 'xxxxxxxx-xxxx-4xxx-8xxx-xxxxxxxxxxxx'.replace(/x/g, () => (Math.random() * 16 | 0).toString(16)); } }
+async function lbSubmit(name) {
+  if (!LB_ON) return false;
+  try {
+    await rpc('submit_score', { p_key:S.lbKey, p_name:name, p_total_level:S.peakLevel, p_best_boss:bossesBeaten(), p_total_gp:Math.floor(S.st.earned), p_total_xp:Math.floor(S.st.xpAll) });
+    return true;
+  } catch (e) {
+    lbMsg(e.message === 'name_taken' ? 'That name is taken. Pick another one.' : e.message === 'bad_name' ? 'Names are 3 to 16 characters: letters, numbers, spaces, hyphens and underscores.' : 'Could not send your score (' + e.message + '). Check your connection and try again.', true);
+    return false;
+  }
+}
+async function lbLoad() {
+  if (!LB_ON || lbBusy) return; lbBusy = true;
+  try {
+    const rows = await rpc('get_leaderboard', { p_sort:lbSort, p_key:S.lbKey || null }) || [];
+    setHTML($('lbBody'), rows.length ? rows.map((r, i) => `<tr class="${r.is_me ? 'me' : ''}"><td>${i + 1}</td><td>${esc(r.name)}</td><td>${(+r.total_level).toLocaleString()}</td>`
+      + `<td>${r.best_boss > 0 ? esc(BOSSES[Math.min(r.best_boss, BOSSES.length) - 1].n) : 'None yet'}</td><td>${fmt(+r.total_gp)}</td><td>${fmt(+r.total_xp)}</td></tr>`).join('')
+      : '<tr><td colspan="6" style="text-align:center">No one is on the board yet. Be the first.</td></tr>');
+  } catch (e) { lbMsg('Could not load the leaderboard (' + e.message + ').', true); }
+  lbBusy = false;
+}
+function lbOpen() {
+  $('lbName').value = S.lbName || $('lbName').value;
+  $('lbJoin').textContent = S.lbName ? 'Update name' : 'Join leaderboard';
+  if (!LB_ON) { lbMsg('The leaderboard is not connected yet. Add your Supabase URL and publishable key at the top of the script in index.html.', true); $('lbJoin').disabled = true; $('lbRefresh').disabled = true; return; }
+  if (S.lbName) lbMsg(`You are on the board as ${S.lbName}.`);
+  lbLoad();
+}
+$('lbJoin').onclick = async () => {
+  const name = $('lbName').value.trim();
+  if (!/^[A-Za-z0-9 _-]{3,16}$/.test(name)) { lbMsg('Names are 3 to 16 characters: letters, numbers, spaces, hyphens and underscores.', true); return; }
+  if (!S.lbKey) S.lbKey = newKey();
+  $('lbJoin').disabled = true;
+  if (await lbSubmit(name)) { S.lbName = name; save(); lbMsg(`You are on the board as ${name}.`); $('lbJoin').textContent = 'Update name'; await lbLoad(); }
+  $('lbJoin').disabled = false;
+};
+$('lbRefresh').onclick = async () => { if (S.lbName) await lbSubmit(S.lbName); lbLoad(); };
+document.querySelectorAll('.sortb').forEach(b => b.onclick = () => {
+  lbSort = b.dataset.sort; document.querySelectorAll('.sortb').forEach(x => x.setAttribute('aria-pressed', x === b)); lbLoad();
+});
 
 /* ---------- save / load ---------- */
 const KEY = 'ninety-nine-save-v1';
@@ -427,11 +872,17 @@ function save() { S.t = Date.now(); try { localStorage.setItem(KEY, JSON.stringi
 function adopt(obj) {
   const f = fresh();
   if (!obj || typeof obj !== 'object' || !obj.s) throw new Error('bad save');
-  for (const key of ['gp','sel','cp','syn','buy','t','buff']) if (obj[key] !== undefined) f[key] = obj[key];
+  for (const key of ['gp','sel','cp','syn','ev','buy','t','buff','frenzy','renown','mute','bossLast','lbKey','lbName','peakLevel']) if (obj[key] !== undefined) f[key] = obj[key];
   for (const k of SKILLS) { const o = obj.s[k.id]; if (o) { f.s[k.id].xp = Math.min(XPCAP, +o.xp || 0); f.s[k.id].tool = Math.min(TIERS.length - 1, o.tool | 0); WORKERS.forEach((_, i) => f.s[k.id].w[i] = (o.w && o.w[i]) | 0); } }
-  f.gp = Math.max(0, +f.gp || 0); f.cp = Math.min(CP.length - 1, f.cp | 0); f.syn = Math.min(SYN.length - 1, f.syn | 0);
+  for (const key of ['q', 'ach', 'pets', 'st']) if (obj[key] && typeof obj[key] === 'object') Object.assign(f[key], obj[key]);
+  if (obj.res) for (const p in f.res) f.res[p] = +obj.res[p] || 0;
+  if (obj.boss) { f.boss.max = Math.min(BOSSES.length - 1, obj.boss.max | 0); f.boss.i = Math.min(f.boss.max, obj.boss.i | 0); f.boss.prog = +obj.boss.prog || 0; Object.assign(f.boss.drops, obj.boss.drops || {}); }
+  f.gp = Math.max(0, +f.gp || 0); f.renown = Math.max(0, f.renown | 0);
+  f.cp = Math.min(CP.length - 1, f.cp | 0); f.syn = Math.min(SYN.length - 1, f.syn | 0); f.ev = Math.min(EV.length - 1, f.ev | 0);
   if (!BYID[f.sel]) f.sel = 'wc'; if (!['1','10','max'].includes(f.buy)) f.buy = '1';
   S = f; for (const k of SKILLS) LV[k.id] = levelOf(S.s[k.id].xp);
+  if (!S.st.xpAll) S.st.xpAll = runXp();
+  S.peakLevel = Math.max(24, S.peakLevel | 0);
   recalcGlobal(); dirtySkills = true;
 }
 function load() {
@@ -439,31 +890,33 @@ function load() {
   if (raw) { try { adopt(JSON.parse(raw)); } catch (e) { adopt(fresh()); } } else adopt(fresh());
   const away = Math.min(8 * 3600, Math.max(0, (Date.now() - S.t) / 1000));
   if (raw && away > 60) {
-    const g0 = S.gp; quiet = true; advance(away); quiet = false;
-    if (S.gp > g0) toast(`Welcome back. Your automation earned ${fmt(S.gp - g0)} gp over ${away >= 3600 ? (away / 3600).toFixed(1) + ' hours' : Math.round(away / 60) + ' minutes'}.`, 9000);
+    const g0 = S.st.earned; quiet = true; advance(away); quiet = false;
+    if (S.st.earned > g0) toast(`Welcome back. Your automation earned ${fmt(S.st.earned - g0)} gp over ${fmtT(away)}.`, 9000);
   }
 }
 $('exp').onclick = () => { save(); $('saveBox').value = btoa(unescape(encodeURIComponent(JSON.stringify(S)))); };
 $('cpy').onclick = async () => { if (!$('saveBox').value) $('exp').onclick(); try { await navigator.clipboard.writeText($('saveBox').value); toast('Save copied.'); } catch (e) { $('saveBox').select(); toast('Copy blocked here. The text is selected: press Ctrl+C or Cmd+C.'); } };
-$('imp').onclick = () => { try { adopt(JSON.parse(decodeURIComponent(escape(atob($('saveBox').value.trim()))))); S.t = Date.now(); save(); renderSel(); toast('Save imported.'); } catch (e) { toast('That save text could not be read. Paste the full exported text and try again.'); } };
+$('imp').onclick = () => { try { adopt(JSON.parse(decodeURIComponent(escape(atob($('saveBox').value.trim()))))); S.t = Date.now(); save(); renderMute(); renderSel(); renderView(); toast('Save imported.'); } catch (e) { toast('That save text could not be read. Paste the full exported text and try again.'); } };
 let resetArm = 0;
 $('reset').onclick = () => {
-  if (Date.now() < resetArm) { adopt(fresh()); save(); renderSel(); $('reset').textContent = 'Reset game'; resetArm = 0; toast('Game reset.'); }
+  if (Date.now() < resetArm) { const keep = { lbKey:S.lbKey, lbName:S.lbName }; adopt(Object.assign(fresh(), keep)); save(); renderMute(); renderSel(); renderView(); $('reset').textContent = 'Reset game'; resetArm = 0; toast('Game reset.'); }
   else { resetArm = Date.now() + 4000; $('reset').textContent = 'Click again to wipe everything'; setTimeout(() => { $('reset').textContent = 'Reset game'; }, 4000); }
 };
 
 /* ---------- loop ---------- */
-load(); renderSel();
-let last = performance.now(), saveT = 0;
+load(); renderMute(); renderSel(); renderView();
+let last = performance.now(), saveT = 0, tickN = 0;
 setInterval(() => {
   const now = performance.now(), dt = Math.min(8 * 3600, (now - last) / 1000); last = now;
-  const big = dt > 5; if (big) quiet = true;
+  if (dt > 5) quiet = true; else S.st.played += dt;
   advance(dt); quiet = false;
   const live = Math.min(dt, 1);
   if (eventLeft > 0) { eventLeft -= live; if (eventLeft <= 0) $('event').classList.remove('on'); }
-  else { nextEvent -= live; if (nextEvent <= 0) { eventLeft = 20; nextEvent = 120 + Math.random() * 180; $('event').classList.add('on'); } }
+  else { nextEvent -= live; if (nextEvent <= 0) { eventLeft = 20; nextEvent = eventGap(); $('event').classList.add('on'); } }
   render();
+  if (++tickN % 5 === 0) { checkAch(); renderView(); }
   saveT += dt; if (saveT >= 10) { saveT = 0; save(); }
+  lbTimer += live; if (lbTimer >= 120) { lbTimer = 0; if (LB_ON && S.lbName) lbSubmit(S.lbName).then(ok => { if (ok && view === 'lb') lbLoad(); }); }
 }, 100);
 document.addEventListener('visibilitychange', () => { if (document.hidden) save(); });
 window.addEventListener('pagehide', save);
